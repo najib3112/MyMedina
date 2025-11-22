@@ -572,22 +572,12 @@ THROTTLE_LIMIT=10
 
 ---
 
-## 👥 **Team**
 
-**RPLBO Project Team:**
-- Project Manager & Backend Developer: [Your Name]
-- [Team Member 2]
-- [Team Member 3]
 
-**Course:** Rekayasa Perangkat Lunak Berorientasi Objek (RPLBO)
-**Institution:** [Your University]
-**Semester:** [Current Semester]
+
 
 ---
 
-## 📄 **License**
-
-This project is developed for academic purposes as part of RPLBO course.
 
 ---
 
@@ -596,8 +586,12 @@ This project is developed for academic purposes as part of RPLBO course.
 - **NestJS** - Progressive Node.js framework
 - **TypeORM** - Amazing ORM for TypeScript
 - **PostgreSQL** - Powerful open-source database
+<<<<<<< HEAD
 - **Cloudinary** - Image hosting and optimization
 - Dosen RPLBO untuk guidance dan support
+=======
+   
+>>>>>>> 06606957e8f19d42211a5fdce656372cdefb0405
 
 ---
 
