@@ -81,6 +81,14 @@ export class AlamatPengirimanDto {
  * Naming Convention: Hybrid Approach
  * - Class name: English (CreateOrderDto)
  * - Properties: Bahasa Indonesia (items, alamatPengiriman, etc.)
+ *
+ * Opsi 1: Gunakan saved address (reuse)
+ * - Provide addressId untuk pakai saved address
+ * - Pre-selected dengan default address jika tidak specify
+ *
+ * Opsi 2: Gunakan alamat baru (inline)
+ * - Provide alamatPengiriman untuk input address baru
+ * - Address baru juga bisa disave ke user addresses
  */
 export class CreateOrderDto {
   @IsArray({ message: 'Items harus berupa array' })
@@ -89,10 +97,44 @@ export class CreateOrderDto {
   @IsNotEmpty({ message: 'Items wajib diisi' })
   items: CreateOrderItemDto[];
 
+  /**
+   * Option 1: Gunakan saved address (UUID)
+   * Jika addressId disediakan, alamatPengiriman boleh kosong
+   * Jika tidak ada addressId, harus provide alamatPengiriman
+   */
+  @IsUUID('4', { message: 'Address ID harus berupa UUID yang valid' })
+  @IsOptional()
+  addressId?: string;
+
+  /**
+   * Option 2: Gunakan alamat baru (inline input)
+   * Jika alamatPengiriman disediakan, akan digunakan untuk order
+   * Optional: bisa di-save ke user addresses dengan flag saveToDaftar
+   *
+   * Jika addressId kosong, alamatPengiriman wajib diisi
+   */
   @ValidateNested()
   @Type(() => AlamatPengirimanDto)
-  @IsNotEmpty({ message: 'Alamat pengiriman wajib diisi' })
-  alamatPengiriman: AlamatPengirimanDto;
+  @IsOptional()
+  alamatPengiriman?: AlamatPengirimanDto;
+
+  /**
+   * Simpan alamat pengiriman ke daftar alamat user?
+   * Hanya berlaku jika menggunakan alamatPengiriman (Option 2)
+   * Default: false
+   */
+  @IsBoolean({ message: 'saveToDaftar harus boolean' })
+  @IsOptional()
+  saveToDaftar?: boolean;
+
+  /**
+   * Label untuk saved address (jika saveToDaftar = true)
+   * Contoh: "Kantor", "Rumah Orang Tua"
+   */
+  @IsString({ message: 'Label alamat harus berupa string' })
+  @IsOptional()
+  @MaxLength(50, { message: 'Label maksimal 50 karakter' })
+  labelAlamat?: string;
 
   @IsEnum(OrderType, { message: 'Tipe order tidak valid' })
   @IsNotEmpty({ message: 'Tipe order wajib diisi' })

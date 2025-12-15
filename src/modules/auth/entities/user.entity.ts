@@ -3,10 +3,12 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Role } from '../enums/role.enum';
+import { Address } from './address.entity';
 
 /**
  * User Entity
@@ -79,6 +81,20 @@ export class User {
 
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   dihapusPada: Date;
+
+  // ========================================
+  // RELATIONSHIPS
+  // ========================================
+
+  /**
+   * User memiliki banyak addresses
+   * Cascade delete: jika user dihapus, semua addresses juga dihapus
+   */
+  @OneToMany(() => Address, (address) => address.user, {
+    cascade: true,
+    eager: false,
+  })
+  addresses: Address[];
 
   // Methods akan ditambahkan di AuthService (mengikuti NestJS best practices)
   // - daftarPengguna()

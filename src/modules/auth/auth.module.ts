@@ -6,8 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EmailModule } from '../../shared/email/email.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { AddressController } from './controllers/address.controller';
 import { User } from './entities/user.entity';
+import { Address } from './entities/address.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { AddressService } from './services/address.service';
 
 /**
  * Auth Module
@@ -30,7 +33,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
  */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]), // Register User entity
+    TypeOrmModule.forFeature([User, Address]), // Register User dan Address entities
     PassportModule.register({ defaultStrategy: 'jwt' }), // Register Passport
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService) => {
@@ -49,9 +52,9 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     }),
     EmailModule, // Register Email module for sending emails
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [TypeOrmModule, JwtStrategy, PassportModule, JwtModule],
+  controllers: [AuthController, AddressController],
+  providers: [AuthService, AddressService, JwtStrategy],
+  exports: [TypeOrmModule, JwtStrategy, PassportModule, JwtModule, AddressService],
 })
 export class AuthModule {}
 

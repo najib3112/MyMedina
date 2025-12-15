@@ -8,6 +8,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { OrderStatus } from '../../common/enums/order-status.enum';
 import { User } from '../auth/entities/user.entity';
+import { Address } from '../auth/entities/address.entity';
+import { AddressService } from '../auth/services/address.service';
 import { ProductVariant } from '../product-variants/entities/product-variant.entity';
 import { Product } from '../products/entities/product.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -40,6 +42,9 @@ export class OrdersService {
     private readonly productRepository: Repository<Product>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Address)
+    private readonly addressRepository: Repository<Address>,
+    private readonly addressService: AddressService,
   ) {}
 
   /**
@@ -66,9 +71,22 @@ export class OrdersService {
   /**
    * Create Order (Checkout)
    * Stateless cart: receives cart data from frontend
+   *
+   * Option 1: Gunakan saved address (pass addressId)
+   * Option 2: Gunakan alamat baru (pass alamatPengiriman)
+   * Option 3: Jika tidak pass apapun, gunakan default address user
    */
   async buatOrder(userId: string, createOrderDto: CreateOrderDto): Promise<Order> {
-    const { items, alamatPengiriman, tipe, ongkosKirim, catatan } = createOrderDto;
+    const {
+      items,
+      addressId,
+      alamatPengiriman,
+      saveToDaftar,
+      labelAlamat,
+      tipe,
+      ongkosKirim,
+      catatan,
+    } = createOrderDto;
 
     // Validate items not empty
     if (!items || items.length === 0) {
@@ -81,7 +99,83 @@ export class OrdersService {
       throw new NotFoundException(`User dengan ID ${userId} tidak ditemukan`);
     }
 
-    // Prepare order items with product snapshot
+    // ========================================
+    // RESOLVE ADDRESS
+    // ========================================
+    let resolvedAddress: any;
+
+    // Option 1: Gunakan saved address
+    if (addressId) {
+      const savedAddress = await this.addressRepository.findOne({
+        where: { id: addressId, userId },
+      });
+
+      if (!savedAddress) {
+        throw new NotFoundException('Alamat tidak ditemukan');
+      }
+
+      if (!savedAddress.aktif) {
+        throw new BadRequestException('Alamat tidak aktif');
+      }
+
+      resolvedAddress = {
+        namaPenerima: savedAddress.namaPenerima,
+        teleponPenerima: savedAddress.teleponPenerima,
+        alamatBaris1: savedAddress.alamatBaris1,
+        alamatBaris2: savedAddress.alamatBaris2,
+        kota: savedAddress.kota,
+        provinsi: savedAddress.provinsi,
+        kodePos: savedAddress.kodePos,
+      };
+    }
+    // Option 2: Gunakan alamat baru (inline)
+    else if (alamatPengiriman) {
+      resolvedAddress = alamatPengiriman;
+
+      // Jika saveToDaftar = true, simpan ke daftar alamat user
+      if (saveToDaftar) {
+        try {
+          await this.addressService.createAddress(userId, {
+            label: labelAlamat || 'Alamat Order Baru',
+            namaPenerima: alamatPengiriman.namaPenerima,
+            teleponPenerima: alamatPengiriman.teleponPenerima,
+            alamatBaris1: alamatPengiriman.alamatBaris1,
+            alamatBaris2: alamatPengiriman.alamatBaris2,
+            kota: alamatPengiriman.kota,
+            provinsi: alamatPengiriman.provinsi,
+            kodePos: alamatPengiriman.kodePos,
+            isDefault: false,
+          });
+        } catch (error) {
+          console.warn('Gagal menyimpan alamat ke daftar:', error.message);
+          // Continue dengan order walaupun gagal save address
+        }
+      }
+    }
+    // Option 3: Gunakan default address user
+    else {
+      const defaultAddress = await this.addressService.getDefaultAddress(userId);
+
+      if (!defaultAddress) {
+        throw new BadRequestException(
+          'Harap sediakan alamatPengiriman atau gunakan default address',
+        );
+      }
+
+      resolvedAddress = {
+        namaPenerima: defaultAddress.namaPenerima,
+        teleponPenerima: defaultAddress.teleponPenerima,
+        alamatBaris1: defaultAddress.alamatBaris1,
+        alamatBaris2: defaultAddress.alamatBaris2,
+        kota: defaultAddress.kota,
+        provinsi: defaultAddress.provinsi,
+        kodePos: defaultAddress.kodePos,
+      };
+    }
+
+    // ========================================
+    // PROCESS ORDER ITEMS
+    // ========================================
     const orderItems: OrderItem[] = [];
     let subtotal = 0;
 
@@ -136,29 +230,28 @@ export class OrdersService {
       await this.productVariantRepository.save(variant);
     }
 
-    // Calculate total
+    // ========================================
+    // CREATE ORDER
+    // ========================================
     const total = subtotal + ongkosKirim;
-
-    // Generate order number
     const nomorOrder = await this.generateOrderNumber();
 
-    // Create order
     const order = this.orderRepository.create({
       nomorOrder,
-      user, // Use User entity instead of userId
+      user,
       tipe,
       status: OrderStatus.PENDING_PAYMENT,
       subtotal,
       ongkosKirim,
       total,
       catatan,
-      namaPenerima: alamatPengiriman.namaPenerima,
-      teleponPenerima: alamatPengiriman.teleponPenerima,
-      alamatBaris1: alamatPengiriman.alamatBaris1,
-      alamatBaris2: alamatPengiriman.alamatBaris2,
-      kota: alamatPengiriman.kota,
-      provinsi: alamatPengiriman.provinsi,
-      kodePos: alamatPengiriman.kodePos,
+      namaPenerima: resolvedAddress.namaPenerima,
+      teleponPenerima: resolvedAddress.teleponPenerima,
+      alamatBaris1: resolvedAddress.alamatBaris1,
+      alamatBaris2: resolvedAddress.alamatBaris2,
+      kota: resolvedAddress.kota,
+      provinsi: resolvedAddress.provinsi,
+      kodePos: resolvedAddress.kodePos,
       items: orderItems,
     });
 
