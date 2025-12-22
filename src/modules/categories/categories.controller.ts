@@ -53,9 +53,8 @@ export class CategoriesController {
   @Roles(Role.ADMIN, Role.OWNER)
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createCategoryDto: CreateCategoryDto) {
-    const category = await this.categoriesService.buatKategori(
-      createCategoryDto,
-    );
+    const category =
+      await this.categoriesService.buatKategori(createCategoryDto);
     return {
       message: 'Kategori berhasil dibuat',
       data: category,
@@ -128,4 +127,3 @@ export class CategoriesController {
     return await this.categoriesService.hapusKategori(id);
   }
 }
-

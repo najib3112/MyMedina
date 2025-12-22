@@ -1,7 +1,7 @@
 import {
-    ConflictException,
-    Injectable,
-    NotFoundException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -173,13 +173,13 @@ export class ProductVariantsService {
    * Ambil harga variant
    * Menggunakan method entity: ambilHarga()
    * Implementation note: Perlu akses ke product.hargaDasar
-   * 
+   *
    * @param variantId - ID variant
    * @returns Harga variant
    */
   async ambilHargaVariant(variantId: string): Promise<number> {
     const variant = await this.ambilVariantById(variantId);
-    
+
     // Gunakan method entity (seharusnya include product)
     return variant.ambilHarga();
   }
@@ -187,46 +187,55 @@ export class ProductVariantsService {
   /**
    * Kurangi stok variant
    * Menggunakan method entity: kurangiStok()
-   * 
+   *
    * @param variantId - ID variant
    * @param kuantitas - Jumlah stok yang dikurangi
    */
-  async kurangiStokVariant(variantId: string, kuantitas: number): Promise<ProductVariant> {
+  async kurangiStokVariant(
+    variantId: string,
+    kuantitas: number,
+  ): Promise<ProductVariant> {
     const variant = await this.ambilVariantById(variantId);
-    
+
     // Gunakan method entity
     variant.kurangiStok(kuantitas);
-    
+
     return await this.variantRepository.save(variant);
   }
 
   /**
    * Kembalikan stok variant
    * Menggunakan method entity: kembalikanStok()
-   * 
+   *
    * @param variantId - ID variant
    * @param kuantitas - Jumlah stok yang dikembalikan
    */
-  async kembalikanStokVariant(variantId: string, kuantitas: number): Promise<ProductVariant> {
+  async kembalikanStokVariant(
+    variantId: string,
+    kuantitas: number,
+  ): Promise<ProductVariant> {
     const variant = await this.ambilVariantById(variantId);
-    
+
     // Gunakan method entity
     variant.kembalikanStok(kuantitas);
-    
+
     return await this.variantRepository.save(variant);
   }
 
   /**
    * Cek apakah stok tersedia
    * Menggunakan method entity: isStokTersedia()
-   * 
+   *
    * @param variantId - ID variant
    * @param kuantitas - Jumlah yang dicek (default 1)
    * @returns true jika stok cukup
    */
-  async isStokTersediaVariant(variantId: string, kuantitas: number = 1): Promise<boolean> {
+  async isStokTersediaVariant(
+    variantId: string,
+    kuantitas: number = 1,
+  ): Promise<boolean> {
     const variant = await this.ambilVariantById(variantId);
-    
+
     // Gunakan method entity
     return variant.isStokTersedia(kuantitas);
   }

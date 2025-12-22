@@ -134,11 +134,10 @@ export class OrderItem {
   /**
    * Hitung subtotal item
    * Subtotal = hargaSatuan * kuantitas
-   * 
+   *
    * @returns Subtotal (decimal)
    */
   hitungSubtotal(): number {
     return Number(this.hargaSatuan) * this.kuantitas;
   }
 }
-

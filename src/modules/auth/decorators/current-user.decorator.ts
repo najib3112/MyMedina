@@ -3,10 +3,10 @@ import { User } from '../entities/user.entity';
 
 /**
  * Current User Decorator
- * 
+ *
  * Mengekstrak user dari JWT token yang sudah diverifikasi
  * Digunakan di controllers untuk mendapatkan current user
- * 
+ *
  * Usage:
  * @Post()
  * async create(@CurrentUser() user: User, @Body() dto: CreateDto) {

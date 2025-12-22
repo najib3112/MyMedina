@@ -45,9 +45,7 @@ export class UploadService {
     // Check if Cloudinary is configured
     const config = this.cloudinary.config();
     if (!config.cloud_name || !config.api_key || !config.api_secret) {
-      console.warn(
-        '⚠️  Cloudinary not configured - Returning placeholder URL',
-      );
+      console.warn('⚠️  Cloudinary not configured - Returning placeholder URL');
       // Return placeholder URL untuk development
       return `https://via.placeholder.com/500x500.png?text=${encodeURIComponent(file.originalname)}`;
     }
@@ -122,9 +120,7 @@ export class UploadService {
         : pathAfterUpload;
 
     // Remove file extension
-    const publicId = publicIdParts
-      .join('/')
-      .replace(/\.[^/.]+$/, '');
+    const publicId = publicIdParts.join('/').replace(/\.[^/.]+$/, '');
 
     try {
       await this.cloudinary.uploader.destroy(publicId);
@@ -135,4 +131,3 @@ export class UploadService {
     }
   }
 }
-

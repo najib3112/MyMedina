@@ -36,4 +36,3 @@ import { ProductVariant } from './entities/product-variant.entity';
   exports: [TypeOrmModule, ProductVariantsService], // Export untuk digunakan di module lain
 })
 export class ProductVariantsModule {}
-

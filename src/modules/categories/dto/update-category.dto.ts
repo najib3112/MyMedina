@@ -17,4 +17,3 @@ import { CreateCategoryDto } from './create-category.dto';
  * PartialType membuat semua field menjadi optional
  */
 export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}
-

@@ -23,11 +23,17 @@ import { OrdersService } from './orders.service';
  */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order, OrderItem, User, Address, ProductVariant, Product]),
+    TypeOrmModule.forFeature([
+      Order,
+      OrderItem,
+      User,
+      Address,
+      ProductVariant,
+      Product,
+    ]),
   ],
   controllers: [OrdersController],
   providers: [OrdersService, AddressService],
   exports: [OrdersService, TypeOrmModule],
 })
 export class OrdersModule {}
-

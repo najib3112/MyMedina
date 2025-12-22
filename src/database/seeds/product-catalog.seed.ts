@@ -68,7 +68,8 @@ export async function seedProductCatalog(dataSource: DataSource) {
       berat: 500,
       status: ProductStatus.READY,
       aktif: true,
-      gambarUrl: 'https://via.placeholder.com/500x500.png?text=Gamis+Syari+Premium',
+      gambarUrl:
+        'https://via.placeholder.com/500x500.png?text=Gamis+Syari+Premium',
     },
     {
       categoryId: savedCategories[0].id,
@@ -79,7 +80,8 @@ export async function seedProductCatalog(dataSource: DataSource) {
       berat: 450,
       status: ProductStatus.PO,
       aktif: true,
-      gambarUrl: 'https://via.placeholder.com/500x500.png?text=Gamis+Katun+Jepang',
+      gambarUrl:
+        'https://via.placeholder.com/500x500.png?text=Gamis+Katun+Jepang',
     },
     // Tunik (2 products)
     {
@@ -230,4 +232,3 @@ export async function seedProductCatalog(dataSource: DataSource) {
   console.log(`   - Products: ${savedProducts.length}`);
   console.log(`   - Variants: ${savedVariants.length}`);
 }
-

@@ -34,4 +34,3 @@ import { UploadService } from './upload.service';
   exports: [UploadService], // Export untuk digunakan di module lain
 })
 export class UploadModule {}
-

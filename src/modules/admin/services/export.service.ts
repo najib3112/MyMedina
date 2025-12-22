@@ -154,7 +154,7 @@ export class ExportService {
    */
   convertToCsv(data: any[], headers: string[]): string {
     let csv = headers.join(',') + '\n';
-    
+
     data.forEach((row) => {
       const values = headers.map((header) => {
         const value = row[header];

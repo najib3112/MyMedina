@@ -1,7 +1,7 @@
 import {
-    ConflictException,
-    Injectable,
-    NotFoundException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -148,7 +148,6 @@ export class CategoriesService {
     return await this.categoryRepository.save(category);
   }
 
-
   /**
    * Hapus Kategori
    *
@@ -178,7 +177,7 @@ export class CategoriesService {
   /**
    * Ambil semua sub-kategori
    * Menggunakan method entity: ambilSubKategori()
-   * 
+   *
    * @param categoryId - ID kategori
    * @returns Array dari Category (sub-categories)
    */
@@ -199,7 +198,7 @@ export class CategoriesService {
   /**
    * Ambil semua products dalam kategori
    * Menggunakan method entity: ambilProducts()
-   * 
+   *
    * @param categoryId - ID kategori
    * @returns Array dari Product
    */
@@ -217,4 +216,3 @@ export class CategoriesService {
     return category.ambilProducts();
   }
 }
-

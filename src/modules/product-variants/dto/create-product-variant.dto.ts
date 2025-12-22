@@ -50,4 +50,3 @@ export class CreateProductVariantDto {
   @IsBoolean({ message: 'Aktif harus berupa boolean' })
   aktif?: boolean;
 }
-

@@ -81,9 +81,9 @@ export class Shipment {
    * Setiap shipment memiliki hubungan OneToOne dengan Order
    * Based on: Class Diagram - Shipment has 0..1 relationship with Order
    */
-  @OneToOne(() => Order, (order) => order.shipment, { 
-    nullable: false, 
-    onDelete: 'CASCADE' 
+  @OneToOne(() => Order, (order) => order.shipment, {
+    nullable: false,
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'order_id' })
   order: Order;
@@ -94,7 +94,7 @@ export class Shipment {
 
   /**
    * Update tracking info (nomor resi)
-   * 
+   *
    * @param nomorResi Nomor resi pengiriman baru
    */
   updateTrackingInfo(nomorResi: string): void {
@@ -104,7 +104,7 @@ export class Shipment {
 
   /**
    * Update status shipment
-   * 
+   *
    * @param statusBaru Status shipment yang baru
    */
   updateStatus(statusBaru: ShipmentStatus): void {
@@ -131,3 +131,4 @@ export class Shipment {
     this.diterimaPada = new Date();
     this.diupdatePada = new Date();
   }
+}

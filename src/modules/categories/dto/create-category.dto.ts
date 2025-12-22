@@ -1,4 +1,11 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 /**
  * Create Category DTO
@@ -35,4 +42,3 @@ export class CreateCategoryDto {
   @IsBoolean({ message: 'Aktif harus berupa boolean' })
   aktif?: boolean;
 }
-

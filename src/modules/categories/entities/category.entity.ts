@@ -91,7 +91,7 @@ export class Category {
 
   /**
    * Ambil semua sub kategori
-   * 
+   *
    * @returns Array dari Category (sub-categories)
    */
   ambilSubKategori(): Category[] {
@@ -100,7 +100,7 @@ export class Category {
 
   /**
    * Ambil semua products dalam kategori ini
-   * 
+   *
    * @returns Array dari Product
    */
   ambilProducts(): Product[] {

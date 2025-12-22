@@ -23,4 +23,3 @@ import { Order } from '../orders/entities/order.entity';
   exports: [PaymentsService, TypeOrmModule],
 })
 export class PaymentsModule {}
-

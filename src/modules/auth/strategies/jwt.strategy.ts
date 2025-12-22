@@ -7,14 +7,14 @@ import { User } from '../entities/user.entity';
 
 /**
  * JWT Strategy
- * 
+ *
  * OOP Concepts:
  * - Inheritance: Extends PassportStrategy
  * - Encapsulation: JWT validation logic dalam satu class
- * 
+ *
  * Design Pattern:
  * - Strategy Pattern: Passport strategy untuk JWT authentication
- * 
+ *
  * Flow:
  * 1. Extract JWT token dari Authorization header
  * 2. Verify token dengan JWT_SECRET
@@ -39,9 +39,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   /**
    * Validate JWT Payload
-   * 
+   *
    * Method ini dipanggil otomatis oleh Passport setelah token terverifikasi
-   * 
+   *
    * @param payload - JWT payload { sub: userId, email, role }
    * @returns User object (akan di-attach ke request.user)
    */
@@ -68,4 +68,3 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return userTanpaPassword;
   }
 }
-

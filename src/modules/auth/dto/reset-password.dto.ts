@@ -2,11 +2,11 @@ import { IsNotEmpty, IsString, MinLength, Matches } from 'class-validator';
 
 /**
  * DTO untuk Reset Password
- * 
+ *
  * OOP Concepts:
  * - Encapsulation: Data validation rules dalam satu class
  * - Data Transfer Object Pattern: Transfer data antar layers
- * 
+ *
  * Based on: Sequence-Auth-Forgot-Password.puml
  */
 export class ResetPasswordDto {
@@ -18,4 +18,3 @@ export class ResetPasswordDto {
   })
   passwordBaru: string;
 }
-

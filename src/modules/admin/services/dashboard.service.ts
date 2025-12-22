@@ -1,6 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
+import {
+  Repository,
+  Between,
+  MoreThanOrEqual,
+  LessThanOrEqual,
+  FindOptionsWhere,
+} from 'typeorm';
 import { Order } from '../../orders/entities/order.entity';
 import { Payment } from '../../payments/entities/payment.entity';
 import { Product } from '../../products/entities/product.entity';
@@ -30,21 +36,20 @@ export class DashboardService {
    * Used for main dashboard cards
    */
   async getDashboardSummary(dateRange?: { startDate: Date; endDate: Date }) {
-    const where = dateRange
+    const where: FindOptionsWhere<Order> | undefined = dateRange
       ? {
-          createdAt: Between(dateRange.startDate, dateRange.endDate),
+          dibuatPada: Between(dateRange.startDate, dateRange.endDate),
         }
-      : {};
+      : undefined;
 
     // Get total orders
     const totalOrders = await this.orderRepository.count({ where });
 
     // Get completed orders
     const completedOrders = await this.orderRepository.count({
-      where: {
-        ...where,
-        status: OrderStatus.COMPLETED,
-      },
+      where: where
+        ? { ...where, status: OrderStatus.COMPLETED }
+        : { status: OrderStatus.COMPLETED },
     });
 
     // Get total revenue (from completed payments)
@@ -53,7 +58,12 @@ export class DashboardService {
       .select('SUM(payment.amount)', 'total')
       .innerJoin(Order, 'order', 'order.id = payment.orderId')
       .where('payment.status = :status', { status: PaymentStatus.SETTLEMENT })
-      .andWhere(dateRange ? 'payment.createdAt BETWEEN :startDate AND :endDate' : '1=1', dateRange)
+      .andWhere(
+        dateRange
+          ? 'payment.dibuatPada BETWEEN :startDate AND :endDate'
+          : '1=1',
+        dateRange,
+      )
       .getRawOne();
 
     const totalRevenue = revenueResult?.total || 0;
@@ -80,10 +90,12 @@ export class DashboardService {
     });
 
     // Calculate conversion rate
-    const conversionRate = totalOrders > 0 ? (completedOrders / totalOrders) * 100 : 0;
+    const conversionRate =
+      totalOrders > 0 ? (completedOrders / totalOrders) * 100 : 0;
 
     // Get average order value
-    const avgOrderValue = completedOrders > 0 ? totalRevenue / completedOrders : 0;
+    const avgOrderValue =
+      completedOrders > 0 ? totalRevenue / completedOrders : 0;
 
     return {
       totalOrders,
@@ -113,7 +125,10 @@ export class DashboardService {
       .createQueryBuilder('order')
       .select('order.status', 'status')
       .addSelect('COUNT(order.id)', 'count')
-      .where(dateRange ? 'order.createdAt BETWEEN :startDate AND :endDate' : '1=1', dateRange)
+      .where(
+        dateRange ? 'order.createdAt BETWEEN :startDate AND :endDate' : '1=1',
+        dateRange,
+      )
       .groupBy('order.status')
       .getRawMany();
 
@@ -122,7 +137,10 @@ export class DashboardService {
       .createQueryBuilder('order')
       .select('order.type', 'type')
       .addSelect('COUNT(order.id)', 'count')
-      .where(dateRange ? 'order.createdAt BETWEEN :startDate AND :endDate' : '1=1', dateRange)
+      .where(
+        dateRange ? 'order.createdAt BETWEEN :startDate AND :endDate' : '1=1',
+        dateRange,
+      )
       .groupBy('order.type')
       .getRawMany();
 
@@ -132,7 +150,10 @@ export class DashboardService {
       .select('order.city', 'city')
       .addSelect('COUNT(order.id)', 'count')
       .addSelect('SUM(order.total)', 'revenue')
-      .where(dateRange ? 'order.createdAt BETWEEN :startDate AND :endDate' : '1=1', dateRange)
+      .where(
+        dateRange ? 'order.createdAt BETWEEN :startDate AND :endDate' : '1=1',
+        dateRange,
+      )
       .groupBy('order.city')
       .orderBy('count', 'DESC')
       .limit(10)
@@ -172,7 +193,10 @@ export class DashboardService {
       .addSelect('COUNT(payment.id)', 'count')
       .addSelect('SUM(payment.amount)', 'total')
       .where('payment.status = :status', { status: PaymentStatus.SETTLEMENT })
-      .andWhere(dateRange ? 'payment.createdAt BETWEEN :startDate AND :endDate' : '1=1', dateRange)
+      .andWhere(
+        dateRange ? 'payment.createdAt BETWEEN :startDate AND :endDate' : '1=1',
+        dateRange,
+      )
       .groupBy('payment.method')
       .getRawMany();
 
@@ -182,7 +206,10 @@ export class DashboardService {
       .select('payment.status', 'status')
       .addSelect('COUNT(payment.id)', 'count')
       .addSelect('SUM(payment.amount)', 'total')
-      .where(dateRange ? 'payment.createdAt BETWEEN :startDate AND :endDate' : '1=1', dateRange)
+      .where(
+        dateRange ? 'payment.createdAt BETWEEN :startDate AND :endDate' : '1=1',
+        dateRange,
+      )
       .groupBy('payment.status')
       .getRawMany();
 
@@ -244,7 +271,10 @@ export class DashboardService {
   /**
    * Get Top Products
    */
-  async getTopProducts(limit: number = 10, dateRange?: { startDate: Date; endDate: Date }) {
+  async getTopProducts(
+    limit: number = 10,
+    dateRange?: { startDate: Date; endDate: Date },
+  ) {
     const query = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.variants', 'variant')
@@ -254,7 +284,7 @@ export class DashboardService {
           .from('order_items', 'orderItem')
           .where('orderItem.product_id = product.id');
 
-        if (dateQuery) {
+        if (dateRange) {
           subQueryBuilder = subQueryBuilder.andWhere(
             'orderItem.created_at BETWEEN :startDate AND :endDate',
           );
@@ -280,7 +310,9 @@ export class DashboardService {
       .limit(limit);
 
     if (dateRange) {
-      query.setParameter('startDate', dateRange.startDate).setParameter('endDate', dateRange.endDate);
+      query
+        .setParameter('startDate', dateRange.startDate)
+        .setParameter('endDate', dateRange.endDate);
     }
 
     return await query.getMany();
@@ -290,11 +322,11 @@ export class DashboardService {
    * Get Customer Statistics
    */
   async getCustomerStatistics(dateRange?: { startDate: Date; endDate: Date }) {
-    const where = dateRange
+    const where: FindOptionsWhere<User> | undefined = dateRange
       ? {
-          createdAt: Between(dateRange.startDate, dateRange.endDate),
+          dibuatPada: Between(dateRange.startDate, dateRange.endDate),
         }
-      : {};
+      : undefined;
 
     // Total customers
     const totalCustomers = await this.userRepository.count();
@@ -367,10 +399,17 @@ export class DashboardService {
       .addSelect('COUNT(orderItem.id)', 'totalSold')
       .addSelect('SUM(orderItem.subtotal)', 'revenue')
       .addSelect('AVG(orderItem.quantity)', 'avgQuantityPerOrder')
-      .leftJoin('order_items', 'orderItem', 'orderItem.product_id = product.id');
+      .leftJoin(
+        'order_items',
+        'orderItem',
+        'orderItem.product_id = product.id',
+      );
 
     if (dateRange) {
-      query.andWhere('orderItem.created_at BETWEEN :startDate AND :endDate', dateRange);
+      query.andWhere(
+        'orderItem.created_at BETWEEN :startDate AND :endDate',
+        dateRange,
+      );
     }
 
     return await query
@@ -383,22 +422,21 @@ export class DashboardService {
    * Get Recent Activity
    */
   async getRecentActivity(limit: number = 20) {
-    const recentOrders = await this.orderRepository
-      .find({
-        relations: ['user'],
-        order: { createdAt: 'DESC' },
-        take: limit,
-      });
+    const recentOrders = await this.orderRepository.find({
+      relations: ['user'],
+      order: { dibuatPada: 'DESC' },
+      take: limit,
+    });
 
     return recentOrders.map((order) => ({
       type: 'order',
       id: order.id,
-      userId: order.userId,
-      userName: order.nomorOrder,
+      userId: order.user?.id,
+      userName: order.user?.nama ?? '',
       action: `Order created - ${order.nomorOrder}`,
       amount: order.total,
       status: order.status,
-      timestamp: order.createdAt,
+      timestamp: order.dibuatPada,
     }));
   }
 }

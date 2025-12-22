@@ -115,10 +115,22 @@ export class Address {
    * Koordinat GPS (optional)
    * Format: "-6.2088,106.8456"
    */
-  @Column({ name: 'latitude', type: 'decimal', precision: 10, scale: 6, nullable: true })
+  @Column({
+    name: 'latitude',
+    type: 'decimal',
+    precision: 10,
+    scale: 6,
+    nullable: true,
+  })
   latitude: number;
 
-  @Column({ name: 'longitude', type: 'decimal', precision: 10, scale: 6, nullable: true })
+  @Column({
+    name: 'longitude',
+    type: 'decimal',
+    precision: 10,
+    scale: 6,
+    nullable: true,
+  })
   longitude: number;
 
   // ========================================
@@ -167,18 +179,18 @@ export class Address {
   /**
    * Dapatkan alamat lengkap dalam format string
    * Format: "Baris1, Baris2, Kota, Provinsi Kode Pos"
-   * 
+   *
    * @returns Alamat lengkap sebagai string
    */
   getAlamatLengkap(): string {
     const parts = [this.alamatBaris1];
-    
+
     if (this.alamatBaris2) {
       parts.push(this.alamatBaris2);
     }
-    
+
     parts.push(this.kota, this.provinsi, this.kodePos);
-    
-    return parts.filter(part => part && part.trim()).join(', ');
+
+    return parts.filter((part) => part && part.trim()).join(', ');
   }
 }

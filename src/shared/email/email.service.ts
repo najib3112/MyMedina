@@ -4,14 +4,14 @@ import { MailerService } from '@nestjs-modules/mailer';
 
 /**
  * Email Service
- * 
+ *
  * Bertanggung jawab untuk mengirim email menggunakan Nodemailer.
- * 
+ *
  * OOP Concepts:
  * - Encapsulation: Email sending logic dikapsulasi dalam service ini
  * - Single Responsibility: Hanya handle email sending
  * - Dependency Injection: Inject MailerService dan ConfigService
- * 
+ *
  * Design Pattern:
  * - Service Pattern: Business logic untuk email
  * - Template Method Pattern: Reusable email templates
@@ -25,14 +25,15 @@ export class EmailService {
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
   ) {
-    this.frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    this.frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
   }
 
   /**
    * Kirim Email Verifikasi
-   * 
+   *
    * Mengirim email berisi link verifikasi ke user yang baru register.
-   * 
+   *
    * @param email - Email tujuan
    * @param nama - Nama user
    * @param userId - ID user untuk link verifikasi
@@ -69,9 +70,9 @@ export class EmailService {
 
   /**
    * Kirim Email Reset Password
-   * 
+   *
    * Mengirim email berisi link reset password ke user yang lupa password.
-   * 
+   *
    * @param email - Email tujuan
    * @param nama - Nama user
    * @param token - Token reset password
@@ -97,16 +98,19 @@ export class EmailService {
 
       this.logger.log(`Email reset password berhasil dikirim ke ${email}`);
     } catch (error) {
-      this.logger.error(`Gagal mengirim email reset password ke ${email}:`, error);
+      this.logger.error(
+        `Gagal mengirim email reset password ke ${email}:`,
+        error,
+      );
       // Tidak throw error agar proses request reset tetap berhasil
     }
   }
 
   /**
    * Kirim Email Welcome (Optional)
-   * 
+   *
    * Mengirim email selamat datang setelah user berhasil verifikasi email.
-   * 
+   *
    * @param email - Email tujuan
    * @param nama - Nama user
    */
@@ -125,6 +129,31 @@ export class EmailService {
       this.logger.log(`Email welcome berhasil dikirim ke ${email}`);
     } catch (error) {
       this.logger.error(`Gagal mengirim email welcome ke ${email}:`, error);
+    }
+  }
+
+  /**
+   * Send waybill/tracking email to customer
+   */
+  async sendWaybillEmail(recipientEmail: string, order: any, waybill: string) {
+    try {
+      const trackingUrl = `${this.frontendUrl}/tracking/${waybill}/${order.shipmentCourierCode}`;
+
+      await this.mailerService.sendMail({
+        to: recipientEmail,
+        subject: `Pesanan Anda #${order.nomorOrder} - Sudah Dikirim!`,
+        template: 'waybill',
+        context: {
+          order,
+          waybill,
+          trackingUrl,
+          frontendUrl: this.frontendUrl,
+        },
+      });
+
+      this.logger.log(`Waybill email sent to ${recipientEmail}`);
+    } catch (error) {
+      this.logger.error(`Failed to send waybill email to ${recipientEmail}:`, error);
     }
   }
 }

@@ -44,4 +44,3 @@ export class CreateShipmentDto {
   @IsNotEmpty({ message: 'Biaya wajib diisi' })
   biaya: number;
 }
-

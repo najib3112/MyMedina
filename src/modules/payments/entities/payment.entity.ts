@@ -95,7 +95,11 @@ export class Payment {
   // TIMESTAMPS
   // ========================================
 
-  @Column({ name: 'initiated_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    name: 'initiated_at',
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   diinisiasiPada: Date;
 
   @Column({ name: 'settlement_time', type: 'timestamp', nullable: true })
@@ -131,7 +135,7 @@ export class Payment {
   /**
    * Buat transaksi Midtrans
    * Implementation: Dihandle di PaymentService untuk integration dengan Midtrans API
-   * 
+   *
    * @returns Transaction ID atau Snap token dari Midtrans
    */
   buatTransaksiMidtrans(): string {
@@ -142,7 +146,7 @@ export class Payment {
   /**
    * Handle webhook dari Midtrans
    * Implementation: Dihandle di PaymentService untuk process webhook payload
-   * 
+   *
    * @param payload Webhook payload dari Midtrans
    */
   handleWebhook(payload: Record<string, any>): void {
@@ -155,7 +159,7 @@ export class Payment {
   /**
    * Verifikasi signature dari webhook Midtrans
    * Implementation: Dihandle di PaymentService dengan Midtrans secret key
-   * 
+   *
    * @param signature Signature dari Midtrans
    * @returns true jika valid, false jika tidak
    */
@@ -167,7 +171,7 @@ export class Payment {
   /**
    * Proses refund untuk payment
    * Implementation: Dihandle di PaymentService untuk integration dengan Midtrans refund API
-   * 
+   *
    * @returns true jika refund berhasil, false jika gagal
    */
   prosesRefund(): boolean {
@@ -179,4 +183,4 @@ export class Payment {
     }
     return false;
   }
-
+}

@@ -1,4 +1,10 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { ShipmentStatus } from '../../../common/enums/shipment-status.enum';
 
 /**
@@ -21,4 +27,3 @@ export class UpdateShipmentStatusDto {
   @MaxLength(255, { message: 'Nomor resi maksimal 255 karakter' })
   nomorResi?: string;
 }
-

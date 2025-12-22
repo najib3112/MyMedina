@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { DaftarDto } from './dto/daftar.dto';
 import { LoginDto } from './dto/login.dto';
@@ -8,22 +18,22 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 /**
  * Auth Controller
- * 
+ *
  * OOP Concepts:
  * - Encapsulation: HTTP request handling dalam satu class
  * - Single Responsibility: Hanya handle HTTP requests untuk auth
  * - Dependency Injection: Inject AuthService
- * 
+ *
  * Design Pattern:
  * - Controller Pattern: Handle HTTP requests dan responses
  * - Delegation Pattern: Delegate business logic ke AuthService
- * 
+ *
  * Based on:
  * - Sequence-Register-SIMPLIFIED.puml
  * - Sequence-Login.puml
  * - Sequence-Email-Verification-SIMPLIFIED.puml
  * - Sequence-Auth-Forgot-Password.puml
- * 
+ *
  * Endpoints:
  * - POST /api/auth/daftar - Register pengguna baru
  * - POST /api/auth/login - Login pengguna
@@ -37,9 +47,9 @@ export class AuthController {
 
   /**
    * POST /api/auth/daftar
-   * 
+   *
    * Register pengguna baru
-   * 
+   *
    * @param daftarDto - Data pendaftaran (email, password, nama, nomorTelepon)
    * @returns User baru dan token verifikasi (development only)
    */
@@ -51,9 +61,9 @@ export class AuthController {
 
   /**
    * POST /api/auth/login
-   * 
+   *
    * Login pengguna
-   * 
+   *
    * @param loginDto - Data login (email, password)
    * @returns JWT access token dan user data
    */
@@ -65,9 +75,9 @@ export class AuthController {
 
   /**
    * GET /api/auth/verifikasi-email/:userId/:token
-   * 
+   *
    * Verifikasi email dengan token dari Redis
-   * 
+   *
    * @param userId - ID user yang akan diverifikasi
    * @param token - Token verifikasi (6 digit)
    * @returns Success message
@@ -83,9 +93,9 @@ export class AuthController {
 
   /**
    * POST /api/auth/lupa-password
-   * 
+   *
    * Request reset password (kirim email dengan link reset)
-   * 
+   *
    * @param lupaPasswordDto - Email user
    * @returns Success message
    */
@@ -97,9 +107,9 @@ export class AuthController {
 
   /**
    * POST /api/auth/reset-password/:token
-   * 
+   *
    * Reset password dengan token
-   * 
+   *
    * @param token - Token reset password dari email
    * @param resetPasswordDto - Password baru
    * @returns Success message
@@ -130,4 +140,3 @@ export class AuthController {
     };
   }
 }
-

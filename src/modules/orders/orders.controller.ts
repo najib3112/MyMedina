@@ -76,7 +76,8 @@ export class OrdersController {
   @Get(':id')
   async ambilOrderById(@Request() req, @Param('id') id: string) {
     const userId = req.user.userId;
-    const isAdmin = req.user.role === Role.ADMIN || req.user.role === Role.OWNER;
+    const isAdmin =
+      req.user.role === Role.ADMIN || req.user.role === Role.OWNER;
     const order = await this.ordersService.ambilOrderById(id, userId, isAdmin);
 
     return {
@@ -120,7 +121,10 @@ export class OrdersController {
     @Param('id') id: string,
     @Body() updateOrderStatusDto: UpdateOrderStatusDto,
   ) {
-    const order = await this.ordersService.updateStatusOrder(id, updateOrderStatusDto);
+    const order = await this.ordersService.updateStatusOrder(
+      id,
+      updateOrderStatusDto,
+    );
 
     return {
       message: 'Status order berhasil diupdate',
@@ -128,4 +132,3 @@ export class OrdersController {
     };
   }
 }
-

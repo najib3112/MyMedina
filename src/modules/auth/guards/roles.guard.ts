@@ -4,15 +4,15 @@ import { Role } from '../enums/role.enum';
 
 /**
  * Roles Guard
- * 
+ *
  * OOP Concepts:
  * - Encapsulation: Authorization logic dalam satu class
  * - Single Responsibility: Hanya handle role-based authorization
- * 
+ *
  * Design Pattern:
  * - Guard Pattern: Protect routes berdasarkan role
  * - Decorator Pattern: Menggunakan @Roles() decorator
- * 
+ *
  * Usage:
  * @Roles(Role.ADMIN, Role.OWNER)
  * @UseGuards(JwtAuthGuard, RolesGuard)
@@ -43,4 +43,3 @@ export class RolesGuard implements CanActivate {
     return requiredRoles.some((role) => user.role === role);
   }
 }
-

@@ -1,7 +1,7 @@
 /**
  * Order Status Enum
  * Defines the lifecycle status of orders
- * 
+ *
  * Based on: ClassDiagram-MyMedina-v4-SIMPLIFIED.puml
  */
 export enum OrderStatus {
@@ -14,6 +14,11 @@ export enum OrderStatus {
    * PAID - Payment received and verified
    */
   PAID = 'PAID',
+
+  /**
+   * PROCESSING - Order is being processed (payment confirmed, preparing order)
+   */
+  PROCESSING = 'PROCESSING',
 
   /**
    * IN_PRODUCTION - Order is being produced (for PO orders)
@@ -55,4 +60,3 @@ export enum OrderStatus {
    */
   EXPIRED = 'EXPIRED',
 }
-

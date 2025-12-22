@@ -1,7 +1,7 @@
 import {
-    ConflictException,
-    Injectable,
-    NotFoundException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -141,8 +141,6 @@ export class ProductsService {
     };
   }
 
-
-
   /**
    * Ambil Produk Berdasarkan ID
    *
@@ -225,7 +223,7 @@ export class ProductsService {
   /**
    * Ambil semua variants dari product
    * Menggunakan method entity: ambilVariants()
-   * 
+   *
    * @param productId - ID produk
    * @returns Array dari ProductVariant
    */
@@ -246,7 +244,7 @@ export class ProductsService {
   /**
    * Ambil total stok tersedia dari semua variants
    * Menggunakan method entity: ambilStokTersedia()
-   * 
+   *
    * @param productId - ID produk
    * @returns Total stok
    */
@@ -267,7 +265,7 @@ export class ProductsService {
   /**
    * Cek apakah product tersedia
    * Menggunakan method entity: isTersedia()
-   * 
+   *
    * @param productId - ID produk
    * @returns true jika tersedia, false jika tidak
    */

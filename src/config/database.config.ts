@@ -3,7 +3,7 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 /**
  * Database Configuration
  * TypeORM configuration for PostgreSQL
- * 
+ *
  * OOP Concepts:
  * - Encapsulation: Database config in one place
  * - Single Responsibility: Only handles database configuration
@@ -21,4 +21,3 @@ export const databaseConfig = (): TypeOrmModuleOptions => ({
   migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
   migrationsRun: false,
 });
-

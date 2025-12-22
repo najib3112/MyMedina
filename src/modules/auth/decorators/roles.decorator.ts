@@ -3,10 +3,10 @@ import { Role } from '../enums/role.enum';
 
 /**
  * Roles Decorator
- * 
+ *
  * OOP Concepts:
  * - Decorator Pattern: Add metadata ke route handler
- * 
+ *
  * Usage:
  * @Roles(Role.ADMIN, Role.OWNER)
  * @UseGuards(JwtAuthGuard, RolesGuard)
@@ -15,4 +15,3 @@ import { Role } from '../enums/role.enum';
  * }
  */
 export const Roles = (...roles: Role[]) => SetMetadata('roles', roles);
-

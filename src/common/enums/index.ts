@@ -9,4 +9,3 @@ export * from './order-type.enum';
 export * from './payment-status.enum';
 export * from './payment-method.enum';
 export * from './shipment-status.enum';
-

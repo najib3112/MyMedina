@@ -1,12 +1,19 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, Matches } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  IsOptional,
+  Matches,
+} from 'class-validator';
 
 /**
  * DTO untuk Register/Daftar Pengguna Baru
- * 
+ *
  * OOP Concepts:
  * - Encapsulation: Data validation rules dalam satu class
  * - Data Transfer Object Pattern: Transfer data antar layers
- * 
+ *
  * Based on: Sequence-Register-SIMPLIFIED.puml
  */
 export class DaftarDto {
@@ -34,4 +41,3 @@ export class DaftarDto {
   })
   nomorTelepon?: string;
 }
-

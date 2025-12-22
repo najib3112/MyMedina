@@ -62,10 +62,19 @@ export class User {
   @Column({ name: 'profile_picture', nullable: true })
   fotoProfil: string;
 
-  @Column({ name: 'verification_token', type: 'varchar', length: 6, nullable: true })
+  @Column({
+    name: 'verification_token',
+    type: 'varchar',
+    length: 6,
+    nullable: true,
+  })
   tokenVerifikasi: string | null;
 
-  @Column({ name: 'verification_token_expires', type: 'timestamp', nullable: true })
+  @Column({
+    name: 'verification_token_expires',
+    type: 'timestamp',
+    nullable: true,
+  })
   tokenVerifikasiKadaluarsa: Date | null;
 
   @Column({ name: 'reset_token', type: 'varchar', length: 255, nullable: true })
@@ -116,4 +125,3 @@ export class User {
   // - resetPassword()
   // - updateProfil()
 }
-

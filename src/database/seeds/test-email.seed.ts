@@ -4,9 +4,9 @@ import { EmailService } from '../../shared/email/email.service';
 
 /**
  * Test Email Service
- * 
+ *
  * Script untuk test apakah email service berfungsi dengan baik.
- * 
+ *
  * Usage:
  * npm run test:email
  */
@@ -29,7 +29,7 @@ async function testEmailService() {
     console.log('✅ Email Verifikasi sent successfully!\n');
 
     // Wait 2 seconds
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Test 2: Email Reset Password
     console.log('📧 Test 2: Sending Email Reset Password...');
@@ -41,7 +41,7 @@ async function testEmailService() {
     console.log('✅ Email Reset Password sent successfully!\n');
 
     // Wait 2 seconds
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Test 3: Email Welcome
     console.log('📧 Test 3: Sending Email Welcome...');
@@ -57,7 +57,6 @@ async function testEmailService() {
     console.log('  1. ✅ Verifikasi Email Anda - MyMedina');
     console.log('  2. 🔐 Reset Password Anda - MyMedina');
     console.log('  3. 🎉 Selamat Datang di MyMedina!\n');
-
   } catch (error) {
     console.error('❌ Email test failed:', error);
     console.error('\nPossible issues:');
@@ -80,4 +79,3 @@ testEmailService()
     console.error('❌ Test failed:', error);
     process.exit(1);
   });
-

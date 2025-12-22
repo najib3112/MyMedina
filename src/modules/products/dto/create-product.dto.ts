@@ -66,4 +66,3 @@ export class CreateProductDto {
   @MaxLength(500, { message: 'Gambar URL maksimal 500 karakter' })
   gambarUrl?: string;
 }
-

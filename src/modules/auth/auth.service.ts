@@ -1,9 +1,9 @@
 import {
-    BadRequestException,
-    ConflictException,
-    Injectable,
-    NotFoundException,
-    UnauthorizedException,
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -75,11 +75,15 @@ export class AuthService {
     const hashPassword = await bcrypt.hash(password, 12);
 
     // Generate token verifikasi email (6 digit random number)
-    const tokenVerifikasi = Math.floor(100000 + Math.random() * 900000).toString();
+    const tokenVerifikasi = Math.floor(
+      100000 + Math.random() * 900000,
+    ).toString();
 
     // Set token expiry (24 jam dari sekarang)
     const tokenVerifikasiKadaluarsa = new Date();
-    tokenVerifikasiKadaluarsa.setHours(tokenVerifikasiKadaluarsa.getHours() + 24);
+    tokenVerifikasiKadaluarsa.setHours(
+      tokenVerifikasiKadaluarsa.getHours() + 24,
+    );
 
     // Buat user baru dengan token verifikasi
     const userBaru = this.userRepository.create({
@@ -110,7 +114,8 @@ export class AuthService {
       message: 'Pendaftaran berhasil! Silakan cek email untuk verifikasi.',
       user: userTanpaPassword,
       // Untuk development, return token (HAPUS di production!)
-      tokenVerifikasi: process.env.NODE_ENV === 'development' ? tokenVerifikasi : undefined,
+      tokenVerifikasi:
+        process.env.NODE_ENV === 'development' ? tokenVerifikasi : undefined,
     };
   }
 
@@ -149,12 +154,16 @@ export class AuthService {
 
     // Cek apakah email sudah terverifikasi
     if (!user.emailTerverifikasi) {
-      throw new UnauthorizedException('Email belum diverifikasi. Silakan cek email Anda.');
+      throw new UnauthorizedException(
+        'Email belum diverifikasi. Silakan cek email Anda.',
+      );
     }
 
     // Cek apakah user aktif
     if (!user.aktif) {
-      throw new UnauthorizedException('Akun Anda telah dinonaktifkan. Hubungi admin.');
+      throw new UnauthorizedException(
+        'Akun Anda telah dinonaktifkan. Hubungi admin.',
+      );
     }
 
     // Generate JWT token
@@ -200,7 +209,9 @@ export class AuthService {
 
     // Cek apakah token verifikasi ada
     if (!user.tokenVerifikasi || !user.tokenVerifikasiKadaluarsa) {
-      throw new BadRequestException('Token verifikasi tidak valid atau sudah kadaluarsa');
+      throw new BadRequestException(
+        'Token verifikasi tidak valid atau sudah kadaluarsa',
+      );
     }
 
     // Cek apakah token sudah expired
@@ -253,7 +264,8 @@ export class AuthService {
     if (!user) {
       // Jangan kasih tahu kalau email tidak terdaftar (security best practice)
       return {
-        message: 'Jika email terdaftar, link reset password akan dikirim ke email Anda.',
+        message:
+          'Jika email terdaftar, link reset password akan dikirim ke email Anda.',
       };
     }
 
@@ -277,9 +289,11 @@ export class AuthService {
       });
 
     return {
-      message: 'Jika email terdaftar, link reset password akan dikirim ke email Anda.',
+      message:
+        'Jika email terdaftar, link reset password akan dikirim ke email Anda.',
       // Untuk development, return token (HAPUS di production!)
-      tokenReset: process.env.NODE_ENV === 'development' ? tokenReset : undefined,
+      tokenReset:
+        process.env.NODE_ENV === 'development' ? tokenReset : undefined,
     };
   }
 

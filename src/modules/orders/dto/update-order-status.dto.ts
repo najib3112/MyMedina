@@ -16,4 +16,3 @@ export class UpdateOrderStatusDto {
   @IsNotEmpty({ message: 'Status wajib diisi' })
   status: OrderStatus;
 }
-

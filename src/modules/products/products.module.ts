@@ -36,4 +36,3 @@ import { Product } from './entities/product.entity';
   exports: [TypeOrmModule, ProductsService], // Export untuk digunakan di module lain
 })
 export class ProductsModule {}
-

@@ -17,4 +17,3 @@ import { CreateProductDto } from './create-product.dto';
  * PartialType membuat semua field menjadi optional
  */
 export class UpdateProductDto extends PartialType(CreateProductDto) {}
-

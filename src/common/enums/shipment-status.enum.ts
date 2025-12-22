@@ -1,7 +1,7 @@
 /**
  * Shipment Status Enum
  * Defines the status of order shipments
- * 
+ *
  * Based on: ClassDiagram-MyMedina-v4-SIMPLIFIED.puml
  */
 export enum ShipmentStatus {
@@ -29,5 +29,9 @@ export enum ShipmentStatus {
    * DELIVERED - Package delivered to customer
    */
   DELIVERED = 'DELIVERED',
-}
 
+  /**
+   * CANCELLED - Shipment was cancelled
+   */
+  CANCELLED = 'CANCELLED',
+}

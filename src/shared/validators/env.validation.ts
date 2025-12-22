@@ -3,7 +3,7 @@ import { IsEnum, IsNumber, IsString, validateSync } from 'class-validator';
 
 /**
  * Environment Variables Validation
- * 
+ *
  * OOP Concepts:
  * - Encapsulation: Environment validation in one place
  * - Type Safety: Ensures all required env vars are present
@@ -68,4 +68,3 @@ export function validate(config: Record<string, unknown>) {
 
   return validatedConfig;
 }
-

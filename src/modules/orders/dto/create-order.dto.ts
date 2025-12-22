@@ -151,4 +151,3 @@ export class CreateOrderDto {
   @MaxLength(1000, { message: 'Catatan maksimal 1000 karakter' })
   catatan?: string;
 }
-

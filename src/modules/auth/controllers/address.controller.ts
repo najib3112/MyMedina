@@ -146,7 +146,9 @@ export class AddressController {
   async getDefaultAddress(@CurrentUser() user: User) {
     const address = await this.addressService.getDefaultAddress(user.id);
     return {
-      message: address ? 'Alamat default berhasil diambil' : 'Alamat tidak ditemukan',
+      message: address
+        ? 'Alamat default berhasil diambil'
+        : 'Alamat tidak ditemukan',
       data: address,
     };
   }
@@ -170,10 +172,7 @@ export class AddressController {
    * }
    */
   @Get(':id')
-  async getAddress(
-    @CurrentUser() user: User,
-    @Param('id') addressId: string,
-  ) {
+  async getAddress(@CurrentUser() user: User, @Param('id') addressId: string) {
     const address = await this.addressService.getAddress(addressId, user.id);
     return {
       message: 'Alamat berhasil diambil',

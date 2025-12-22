@@ -53,7 +53,7 @@ export class BiteshipWebhookController {
         await this.orderRepository.save(shipment.order);
         break;
 
-      case 'cancelled':
+      case 'canceled':
       case 'rejected':
       case 'returned':
         shipment.status = ShipmentStatus.CANCELLED;

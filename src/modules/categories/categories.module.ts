@@ -29,4 +29,3 @@ import { Category } from './entities/category.entity';
   exports: [TypeOrmModule, CategoriesService], // Export untuk digunakan di module lain
 })
 export class CategoriesModule {}
-

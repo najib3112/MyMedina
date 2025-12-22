@@ -54,7 +54,12 @@ import { AddressService } from './services/address.service';
   ],
   controllers: [AuthController, AddressController],
   providers: [AuthService, AddressService, JwtStrategy],
-  exports: [TypeOrmModule, JwtStrategy, PassportModule, JwtModule, AddressService],
+  exports: [
+    TypeOrmModule,
+    JwtStrategy,
+    PassportModule,
+    JwtModule,
+    AddressService,
+  ],
 })
 export class AuthModule {}
-

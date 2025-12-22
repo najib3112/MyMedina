@@ -1,7 +1,7 @@
 /**
  * Payment Method Enum
  * Defines available payment methods via Midtrans
- * 
+ *
  * Based on: ClassDiagram-MyMedina-v4-SIMPLIFIED.puml
  */
 export enum PaymentMethod {
@@ -25,4 +25,3 @@ export enum PaymentMethod {
    */
   CREDIT_CARD = 'CREDIT_CARD',
 }
-

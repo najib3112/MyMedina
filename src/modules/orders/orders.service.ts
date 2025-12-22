@@ -1,8 +1,8 @@
 import {
-    BadRequestException,
-    ForbiddenException,
-    Injectable,
-    NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -76,7 +76,10 @@ export class OrdersService {
    * Option 2: Gunakan alamat baru (pass alamatPengiriman)
    * Option 3: Jika tidak pass apapun, gunakan default address user
    */
-  async buatOrder(userId: string, createOrderDto: CreateOrderDto): Promise<Order> {
+  async buatOrder(
+    userId: string,
+    createOrderDto: CreateOrderDto,
+  ): Promise<Order> {
     const {
       items,
       addressId,
@@ -154,7 +157,8 @@ export class OrdersService {
     }
     // Option 3: Gunakan default address user
     else {
-      const defaultAddress = await this.addressService.getDefaultAddress(userId);
+      const defaultAddress =
+        await this.addressService.getDefaultAddress(userId);
 
       if (!defaultAddress) {
         throw new BadRequestException(
@@ -272,7 +276,11 @@ export class OrdersService {
   /**
    * Get Order by ID
    */
-  async ambilOrderById(orderId: string, userId: string, isAdmin: boolean): Promise<Order> {
+  async ambilOrderById(
+    orderId: string,
+    userId: string,
+    isAdmin: boolean,
+  ): Promise<Order> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
       relations: ['items', 'items.product', 'items.variant', 'user'],
@@ -342,11 +350,15 @@ export class OrdersService {
 
     // Validate status transition
     if (order.status === OrderStatus.CANCELLED) {
-      throw new BadRequestException('Order yang sudah dibatalkan tidak dapat diubah');
+      throw new BadRequestException(
+        'Order yang sudah dibatalkan tidak dapat diubah',
+      );
     }
 
     if (order.status === OrderStatus.COMPLETED) {
-      throw new BadRequestException('Order yang sudah selesai tidak dapat diubah');
+      throw new BadRequestException(
+        'Order yang sudah selesai tidak dapat diubah',
+      );
     }
 
     // Update status
@@ -374,7 +386,7 @@ export class OrdersService {
   /**
    * Generate nomor order baru
    * Menggunakan method entity: generateNomorOrder()
-   * 
+   *
    * @returns Nomor order unik
    */
   async generateNomorOrderNew(): Promise<string> {
@@ -385,16 +397,18 @@ export class OrdersService {
    * Hitung total order
    * Menggunakan method entity: hitungTotal()
    * Total = subtotal + ongkosKirim
-   * 
+   *
    * @param orderId - ID order
    * @returns Total order
    */
   async hitungTotalOrder(orderId: string): Promise<number> {
-    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+    });
     if (!order) {
       throw new NotFoundException('Order tidak ditemukan');
     }
-    
+
     // Gunakan method entity
     return order.hitungTotal();
   }
@@ -402,12 +416,17 @@ export class OrdersService {
   /**
    * Update status order
    * Menggunakan method entity: updateStatus()
-   * 
+   *
    * @param orderId - ID order
    * @param statusBaru - Status baru
    */
-  async updateStatusOrderNew(orderId: string, statusBaru: OrderStatus): Promise<Order> {
-    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+  async updateStatusOrderNew(
+    orderId: string,
+    statusBaru: OrderStatus,
+  ): Promise<Order> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+    });
     if (!order) {
       throw new NotFoundException('Order tidak ditemukan');
     }
@@ -420,18 +439,20 @@ export class OrdersService {
   /**
    * Batalkan order
    * Menggunakan method entity: batalkanOrder()
-   * 
+   *
    * @param orderId - ID order
    */
   async batalkanOrderNew(orderId: string): Promise<Order> {
-    const order = await this.orderRepository.findOne({ where: { id: orderId } });
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+    });
     if (!order) {
       throw new NotFoundException('Order tidak ditemukan');
     }
 
     // Gunakan method entity
     order.batalkanOrder();
-    
+
     // Restore stock dari setiap item
     for (const item of order.items) {
       const variant = await this.productVariantRepository.findOne({
@@ -449,7 +470,7 @@ export class OrdersService {
   /**
    * Ambil semua items dalam order
    * Menggunakan method entity: ambilItems()
-   * 
+   *
    * @param orderId - ID order
    * @returns Array dari OrderItem
    */
@@ -469,7 +490,7 @@ export class OrdersService {
   /**
    * Ambil semua payments untuk order
    * Menggunakan method entity: ambilPayments()
-   * 
+   *
    * @param orderId - ID order
    * @returns Array dari Payment
    */
@@ -489,7 +510,7 @@ export class OrdersService {
   /**
    * Ambil shipment untuk order
    * Menggunakan method entity: ambilShipment()
-   * 
+   *
    * @param orderId - ID order
    * @returns Shipment atau undefined
    */

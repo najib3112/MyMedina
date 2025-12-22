@@ -1,14 +1,14 @@
 import {
-    BadRequestException,
-    Body,
-    Controller,
-    Get,
-    HttpCode,
-    HttpStatus,
-    Param,
-    Post,
-    Put,
-    UseGuards,
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  UseGuards,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { PaymentStatus } from '../../common/enums/payment-status.enum';
@@ -46,8 +46,7 @@ export class PaymentsController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async buatPembayaran(@Body() createPaymentDto: CreatePaymentDto) {
-    const payment =
-      await this.paymentsService.buatPembayaran(createPaymentDto);
+    const payment = await this.paymentsService.buatPembayaran(createPaymentDto);
 
     return {
       message: 'Pembayaran berhasil dibuat',
@@ -130,10 +129,9 @@ export class PaymentsController {
     }
 
     // Get payment by transaction ID
-    const payment =
-      await this.paymentsService.ambilPembayaranByTransactionId(
-        webhookData.order_id,
-      );
+    const payment = await this.paymentsService.ambilPembayaranByTransactionId(
+      webhookData.order_id,
+    );
 
     // Map Midtrans transaction status to our PaymentStatus
     let status: PaymentStatus;
@@ -176,4 +174,3 @@ export class PaymentsController {
     };
   }
 }
-

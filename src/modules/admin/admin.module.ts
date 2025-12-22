@@ -15,9 +15,7 @@ import { ExportService } from './services/export.service';
  * Provides dashboard, analytics, and reporting functionality for admins
  */
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Order, Payment, Product, User]),
-  ],
+  imports: [TypeOrmModule.forFeature([Order, Payment, Product, User])],
   controllers: [DashboardController, ReportsController],
   providers: [DashboardService, ReportsService, ExportService],
   exports: [DashboardService, ReportsService, ExportService],

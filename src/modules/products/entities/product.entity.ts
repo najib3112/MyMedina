@@ -1,13 +1,13 @@
 import {
-    Column,
-    CreateDateColumn,
-    DeleteDateColumn,
-    Entity,
-    JoinColumn,
-    ManyToOne,
-    OneToMany,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ProductStatus } from '../../../common/enums/product-status.enum';
 import { Category } from '../../categories/entities/category.entity';
@@ -105,7 +105,7 @@ export class Product {
 
   /**
    * Ambil semua variants dari product
-   * 
+   *
    * @returns Array dari ProductVariant
    */
   ambilVariants(): ProductVariant[] {
@@ -114,23 +114,25 @@ export class Product {
 
   /**
    * Ambil total stok tersedia dari semua variants
-   * 
+   *
    * @returns Total stok (integer)
    */
   ambilStokTersedia(): number {
     if (!this.variants || this.variants.length === 0) {
       return 0;
     }
-    return this.variants.reduce((total, variant) => total + (variant.stok || 0), 0);
+    return this.variants.reduce(
+      (total, variant) => total + (variant.stok || 0),
+      0,
+    );
   }
 
   /**
    * Cek apakah product tersedia (ada stok dan aktif)
-   * 
+   *
    * @returns true jika tersedia, false jika tidak
    */
   isTersedia(): boolean {
     return this.aktif && this.ambilStokTersedia() > 0;
   }
 }
-

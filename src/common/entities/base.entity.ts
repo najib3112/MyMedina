@@ -8,7 +8,7 @@ import {
 /**
  * Base Entity
  * Abstract class that all entities will extend
- * 
+ *
  * OOP Concepts:
  * - Abstraction: Abstract class cannot be instantiated directly
  * - Inheritance: All entities inherit from this base class
@@ -58,4 +58,3 @@ export abstract class BaseEntity {
     return !this.id;
   }
 }
-

@@ -55,7 +55,10 @@ export class CreateAddressDto {
   alamatBaris2?: string;
 
   /**
-   * Kota/Kabupaten
+   * Kota/Kabupaten (admin_level_2 dari Biteship)
+   * FETCH dari: GET /shipment/areas?input=...
+   * User pilih lokasi → auto-fill dari response
+   * Contoh: "Jakarta Pusat", "Surabaya", "Medan"
    */
   @IsString({ message: 'Kota harus berupa string' })
   @IsNotEmpty({ message: 'Kota wajib diisi' })
@@ -63,7 +66,10 @@ export class CreateAddressDto {
   kota: string;
 
   /**
-   * Provinsi
+   * Provinsi (admin_level_1 dari Biteship)
+   * FETCH dari: GET /shipment/areas?input=...
+   * User pilih lokasi → auto-fill dari response
+   * Contoh: "DKI Jakarta", "Jawa Timur", "Sumatera Utara"
    */
   @IsString({ message: 'Provinsi harus berupa string' })
   @IsNotEmpty({ message: 'Provinsi wajib diisi' })
@@ -71,7 +77,9 @@ export class CreateAddressDto {
   provinsi: string;
 
   /**
-   * Kode pos
+   * Kode pos (dari Biteship)
+   * FETCH dari: GET /shipment/areas?input=...
+   * User pilih lokasi → auto-fill dari response
    */
   @IsNumberString({}, { message: 'Kode pos harus berupa angka' })
   @IsNotEmpty({ message: 'Kode pos wajib diisi' })

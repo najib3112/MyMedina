@@ -138,4 +138,3 @@ export class ProductsController {
     return await this.productsService.hapusProduk(id);
   }
 }
-

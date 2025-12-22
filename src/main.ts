@@ -30,8 +30,12 @@ async function bootstrap() {
   const port = process.env.PORT || 5000;
   await app.listen(port);
 
-  console.log(`🚀 MyMedina Backend is running on: http://localhost:${port}/api`);
-  console.log(`📊 Database: ${process.env.DB_NAME}@${process.env.DB_HOST}:${process.env.DB_PORT}`);
+  console.log(
+    `🚀 MyMedina Backend is running on: http://localhost:${port}/api`,
+  );
+  console.log(
+    `📊 Database: ${process.env.DB_NAME}@${process.env.DB_HOST}:${process.env.DB_PORT}`,
+  );
 }
 
-bootstrap();
+void bootstrap();

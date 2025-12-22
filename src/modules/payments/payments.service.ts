@@ -1,7 +1,7 @@
 import {
-    BadRequestException,
-    Injectable,
-    NotFoundException,
+  BadRequestException,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as midtransClient from 'midtrans-client';
@@ -32,7 +32,6 @@ import { Payment } from './entities/payment.entity';
  */
 @Injectable()
 export class PaymentsService {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private snap: any;
 
   constructor(
@@ -51,26 +50,24 @@ export class PaymentsService {
   }
 
   /**
-   * Generate unique transaction ID
-   * Format: TRX-YYYYMMDD-XXXXX
+   * Generate unique transaction ID with timestamp for better uniqueness
+   * Format: TRX-YYYYMMDD-HHMMSS-RND
+   * 
+   * FIX: Menambahkan timestamp lengkap dan random number untuk menghindari collision
    */
-  private async generateTransactionId(): Promise<string> {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const dateStr = `${year}${month}${day}`;
-
-    // Get count of payments today
-    const count = await this.paymentRepository
-      .createQueryBuilder('payment')
-      .where('payment.transactionId LIKE :pattern', {
-        pattern: `TRX-${dateStr}-%`,
-      })
-      .getCount();
-
-    const sequence = String(count + 1).padStart(5, '0');
-    return `TRX-${dateStr}-${sequence}`;
+  private generateTransactionId(): string {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    // Add random 4-digit number untuk extra uniqueness
+    const random = Math.floor(1000 + Math.random() * 9000);
+    
+    return `TRX-${year}${month}${day}-${hours}${minutes}${seconds}-${random}`;
   }
 
   /**
@@ -111,8 +108,8 @@ export class PaymentsService {
       );
     }
 
-    // Generate transaction ID
-    const transactionId = await this.generateTransactionId();
+    // Generate transaction ID (synchronous sekarang, lebih cepat)
+    const transactionId = this.generateTransactionId();
 
     // Calculate expiry (24 hours from now)
     const kadaluarsaPada = new Date();
@@ -135,7 +132,7 @@ export class PaymentsService {
         id: item.variantId,
         price: Math.round(Number(item.hargaSatuan)),
         quantity: item.kuantitas,
-        name: `${item.namaProduct} - ${item.ukuranVariant} ${item.warnaVariant}`,
+        name: `${item.namaProduct} - ${item.ukuranVariant} ${item.warnaVariant}`.substring(0, 50), // Midtrans limit 50 chars
       })),
       // Shipping cost as separate item
       {
@@ -174,8 +171,6 @@ export class PaymentsService {
         },
       },
       item_details: itemDetails,
-      // Don't restrict payment methods in Sandbox - let Midtrans show all available options
-      // In production, you can enable specific methods based on `metode` parameter
       expiry: {
         start_time: startTime,
         unit: 'hours',
@@ -183,26 +178,62 @@ export class PaymentsService {
       },
     };
 
+    // Create payment entity FIRST before calling Midtrans
+    const payment = this.paymentRepository.create({
+      orderId,
+      transactionId,
+      metode,
+      status: PaymentStatus.PENDING,
+      jumlah: order.total,
+      kadaluarsaPada,
+      diinisiasiPada: new Date(),
+    });
+
     try {
       // Call Midtrans Snap API
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       const midtransResponse = await this.snap.createTransaction(parameter);
 
-      // Create payment with Midtrans response
-      const payment = this.paymentRepository.create({
-        orderId,
+      // Update payment with Midtrans URL
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      payment.urlPembayaran = midtransResponse.redirect_url;
+
+      // Save to database
+      return await this.paymentRepository.save(payment);
+      
+    } catch (error) {
+      // Log detailed error untuk debugging
+      console.error('Midtrans Error Details:', {
         transactionId,
-        metode,
-        status: PaymentStatus.PENDING,
-        jumlah: order.total,
+        orderId,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        urlPembayaran: midtransResponse.redirect_url, // Real Midtrans payment URL
-        kadaluarsaPada,
-        diinisiasiPada: new Date(),
+        error: error?.message,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        response: error?.ApiResponse,
       });
 
-      return await this.paymentRepository.save(payment);
-    } catch (error) {
+      // Jika error "already been taken", coba generate ID baru dan retry
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (error?.message?.includes('already been taken')) {
+        console.log('Transaction ID collision detected, generating new ID...');
+        
+        // Generate new transaction ID with extra random suffix
+        const retryTransactionId = `${transactionId}-RETRY-${Date.now()}`;
+        payment.transactionId = retryTransactionId;
+        parameter.transaction_details.order_id = retryTransactionId;
+
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+          const retryResponse = await this.snap.createTransaction(parameter);
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+          payment.urlPembayaran = retryResponse.redirect_url;
+          return await this.paymentRepository.save(payment);
+        } catch (retryError) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          throw new BadRequestException(`Gagal membuat pembayaran setelah retry: ${retryError?.message}`);
+        }
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const errorMessage = error?.message || 'Unknown error';
       throw new BadRequestException(
@@ -334,7 +365,7 @@ export class PaymentsService {
   /**
    * Buat transaksi Midtrans
    * Menggunakan method entity: buatTransaksiMidtrans()
-   * 
+   *
    * @param paymentId - ID payment
    * @returns Transaction ID atau Snap token
    */
@@ -354,11 +385,14 @@ export class PaymentsService {
   /**
    * Handle webhook dari Midtrans
    * Menggunakan method entity: handleWebhook()
-   * 
+   *
    * @param paymentId - ID payment
    * @param payload - Webhook payload dari Midtrans
    */
-  async handleWebhookPayment(paymentId: string, payload: Record<string, any>): Promise<Payment> {
+  async handleWebhookPayment(
+    paymentId: string,
+    payload: Record<string, any>,
+  ): Promise<Payment> {
     const payment = await this.paymentRepository.findOne({
       where: { id: paymentId },
     });
@@ -369,19 +403,22 @@ export class PaymentsService {
 
     // Gunakan method entity
     payment.handleWebhook(payload);
-    
+
     return await this.paymentRepository.save(payment);
   }
 
   /**
    * Verifikasi signature dari webhook Midtrans
    * Menggunakan method entity: verifySignature()
-   * 
+   *
    * @param paymentId - ID payment
    * @param signature - Signature dari Midtrans
    * @returns true jika valid
    */
-  async verifySignaturePayment(paymentId: string, signature: string): Promise<boolean> {
+  async verifySignaturePayment(
+    paymentId: string,
+    signature: string,
+  ): Promise<boolean> {
     const payment = await this.paymentRepository.findOne({
       where: { id: paymentId },
     });
@@ -397,7 +434,7 @@ export class PaymentsService {
   /**
    * Proses refund untuk payment
    * Menggunakan method entity: prosesRefund()
-   * 
+   *
    * @param paymentId - ID payment
    * @returns true jika refund berhasil
    */
@@ -413,13 +450,13 @@ export class PaymentsService {
 
     // Gunakan method entity
     const refundSuccess = payment.prosesRefund();
-    
+
     if (refundSuccess) {
       // Update order status
       const order = payment.order;
       order.status = OrderStatus.REFUNDED;
       await this.orderRepository.save(order);
-      
+
       await this.paymentRepository.save(payment);
     }
 

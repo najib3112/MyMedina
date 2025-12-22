@@ -88,7 +88,10 @@ export class ReportsService {
         endDate,
       },
       summary: {
-        totalTransactions: parseInt(totalSalesResult?.totalTransactions || 0, 10),
+        totalTransactions: parseInt(
+          totalSalesResult?.totalTransactions || 0,
+          10,
+        ),
         totalRevenue: Number(totalSalesResult?.totalRevenue || 0),
       },
       salesByMethod: salesByMethod.map((item) => ({
@@ -137,14 +140,20 @@ export class ReportsService {
       .getRawMany();
 
     // Segment customers
-    const highValue = customerSegmentation.filter((c) => Number(c.totalSpent) > 500000).length;
+    const highValue = customerSegmentation.filter(
+      (c) => Number(c.totalSpent) > 500000,
+    ).length;
     const medium = customerSegmentation.filter(
       (c) => Number(c.totalSpent) >= 100000 && Number(c.totalSpent) <= 500000,
     ).length;
-    const lowValue = customerSegmentation.filter((c) => Number(c.totalSpent) < 100000).length;
+    const lowValue = customerSegmentation.filter(
+      (c) => Number(c.totalSpent) < 100000,
+    ).length;
 
     // Customer retention
-    const repeatCustomers = customerSegmentation.filter((c) => c.orderCount > 1).length;
+    const repeatCustomers = customerSegmentation.filter(
+      (c) => c.orderCount > 1,
+    ).length;
 
     return {
       period: {
@@ -159,15 +168,21 @@ export class ReportsService {
       segmentation: {
         highValue: {
           count: highValue,
-          percentage: parseFloat(((highValue / customerSegmentation.length) * 100).toFixed(2)),
+          percentage: parseFloat(
+            ((highValue / customerSegmentation.length) * 100).toFixed(2),
+          ),
         },
         medium: {
           count: medium,
-          percentage: parseFloat(((medium / customerSegmentation.length) * 100).toFixed(2)),
+          percentage: parseFloat(
+            ((medium / customerSegmentation.length) * 100).toFixed(2),
+          ),
         },
         lowValue: {
           count: lowValue,
-          percentage: parseFloat(((lowValue / customerSegmentation.length) * 100).toFixed(2)),
+          percentage: parseFloat(
+            ((lowValue / customerSegmentation.length) * 100).toFixed(2),
+          ),
         },
       },
       topCustomers: customerSegmentation
@@ -201,14 +216,38 @@ export class ReportsService {
       .getRawMany();
 
     // Categorize products
-    const lowStock = products.filter((p) => Number(p.totalStock) < 10);
-    const outOfStock = products.filter((p) => Number(p.totalStock) === 0);
+    const lowStockProducts = products
+      .filter((p) => Number(p.totalStock) < 10)
+      .map((p) => ({
+        id: p.id,
+        name: p.name,
+        status: p.status,
+        totalStock: Number(p.totalStock),
+        totalVariants: parseInt(p.totalVariants, 10),
+        stockStatus:
+          Number(p.totalStock) === 0
+            ? 'OUT_OF_STOCK'
+            : Number(p.totalStock) < 10
+              ? 'LOW_STOCK'
+              : 'IN_STOCK',
+      }));
+
+    const outOfStockProducts = products
+      .filter((p) => Number(p.totalStock) === 0)
+      .map((p) => ({
+        id: p.id,
+        name: p.name,
+        status: p.status,
+        totalStock: Number(p.totalStock),
+        totalVariants: parseInt(p.totalVariants, 10),
+        stockStatus: 'OUT_OF_STOCK',
+      }));
 
     return {
       summary: {
         totalProducts: products.length,
-        lowStockProducts: lowStock.length,
-        outOfStockProducts: outOfStock.length,
+        lowStockProducts: lowStockProducts.length,
+        outOfStockProducts: outOfStockProducts.length,
       },
       products: products.map((p) => ({
         id: p.id,
@@ -216,7 +255,12 @@ export class ReportsService {
         status: p.status,
         totalStock: Number(p.totalStock),
         totalVariants: parseInt(p.totalVariants, 10),
-        stockStatus: Number(p.totalStock) === 0 ? 'OUT_OF_STOCK' : Number(p.totalStock) < 10 ? 'LOW_STOCK' : 'IN_STOCK',
+        stockStatus:
+          Number(p.totalStock) === 0
+            ? 'OUT_OF_STOCK'
+            : Number(p.totalStock) < 10
+              ? 'LOW_STOCK'
+              : 'IN_STOCK',
       })),
       lowStockProducts,
       outOfStockProducts,
@@ -287,7 +331,9 @@ export class ReportsService {
       summary: {
         totalOrders: parseInt(summary?.totalOrders || 0, 10),
         totalRevenue: Number(summary?.totalRevenue || 0),
-        averageOrderValue: parseFloat((Number(summary?.averageOrderValue) || 0).toFixed(2)),
+        averageOrderValue: parseFloat(
+          (Number(summary?.averageOrderValue) || 0).toFixed(2),
+        ),
       },
       ordersByStatus: ordersByStatus.map((item) => ({
         status: item.status,

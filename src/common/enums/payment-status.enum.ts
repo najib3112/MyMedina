@@ -1,7 +1,7 @@
 /**
  * Payment Status Enum
  * Defines the status of payment transactions
- * 
+ *
  * Based on: ClassDiagram-MyMedina-v4-SIMPLIFIED.puml
  * Aligned with Midtrans payment statuses
  */
@@ -36,4 +36,3 @@ export enum PaymentStatus {
    */
   REFUND = 'REFUND',
 }
-

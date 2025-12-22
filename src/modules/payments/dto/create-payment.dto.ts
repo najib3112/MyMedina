@@ -21,4 +21,3 @@ export class CreatePaymentDto {
   @IsNotEmpty({ message: 'Metode pembayaran wajib diisi' })
   metode: PaymentMethod;
 }
-

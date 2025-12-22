@@ -1,14 +1,17 @@
-import { Controller, Get, Query, UseGuards, HttpStatus, HttpCode } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+  HttpStatus,
+  HttpCode,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { Role } from '../../../common/enums/role.enum';
 import { DashboardService } from '../services/dashboard.service';
-import {
-  DateRangeDto,
-  RevenueTrendQueryDto,
-  PaginationQueryDto,
-} from '../dto/dashboard.dto';
+import { DateRangeDto, RevenueTrendQueryDto } from '../dto/dashboard.dto';
 
 /**
  * Admin Dashboard Controller
@@ -27,12 +30,13 @@ export class DashboardController {
   @Get('summary')
   @HttpCode(HttpStatus.OK)
   async getDashboardSummary(@Query() dateRange: DateRangeDto) {
-    const dates = dateRange.startDate && dateRange.endDate
-      ? {
-          startDate: new Date(dateRange.startDate),
-          endDate: new Date(dateRange.endDate),
-        }
-      : undefined;
+    const dates =
+      dateRange.startDate && dateRange.endDate
+        ? {
+            startDate: new Date(dateRange.startDate),
+            endDate: new Date(dateRange.endDate),
+          }
+        : undefined;
 
     const summary = await this.dashboardService.getDashboardSummary(dates);
 
@@ -49,12 +53,13 @@ export class DashboardController {
   @Get('orders/statistics')
   @HttpCode(HttpStatus.OK)
   async getOrderStatistics(@Query() dateRange: DateRangeDto) {
-    const dates = dateRange.startDate && dateRange.endDate
-      ? {
-          startDate: new Date(dateRange.startDate),
-          endDate: new Date(dateRange.endDate),
-        }
-      : undefined;
+    const dates =
+      dateRange.startDate && dateRange.endDate
+        ? {
+            startDate: new Date(dateRange.startDate),
+            endDate: new Date(dateRange.endDate),
+          }
+        : undefined;
 
     const stats = await this.dashboardService.getOrderStatistics(dates);
 
@@ -71,12 +76,13 @@ export class DashboardController {
   @Get('payments/statistics')
   @HttpCode(HttpStatus.OK)
   async getPaymentStatistics(@Query() dateRange: DateRangeDto) {
-    const dates = dateRange.startDate && dateRange.endDate
-      ? {
-          startDate: new Date(dateRange.startDate),
-          endDate: new Date(dateRange.endDate),
-        }
-      : undefined;
+    const dates =
+      dateRange.startDate && dateRange.endDate
+        ? {
+            startDate: new Date(dateRange.startDate),
+            endDate: new Date(dateRange.endDate),
+          }
+        : undefined;
 
     const stats = await this.dashboardService.getPaymentStatistics(dates);
 
@@ -114,12 +120,13 @@ export class DashboardController {
     @Query() dateRange: DateRangeDto,
     @Query('limit') limit: string = '10',
   ) {
-    const dates = dateRange.startDate && dateRange.endDate
-      ? {
-          startDate: new Date(dateRange.startDate),
-          endDate: new Date(dateRange.endDate),
-        }
-      : undefined;
+    const dates =
+      dateRange.startDate && dateRange.endDate
+        ? {
+            startDate: new Date(dateRange.startDate),
+            endDate: new Date(dateRange.endDate),
+          }
+        : undefined;
 
     const products = await this.dashboardService.getTopProducts(
       parseInt(limit, 10),
@@ -139,14 +146,16 @@ export class DashboardController {
   @Get('products/performance')
   @HttpCode(HttpStatus.OK)
   async getProductPerformance(@Query() dateRange: DateRangeDto) {
-    const dates = dateRange.startDate && dateRange.endDate
-      ? {
-          startDate: new Date(dateRange.startDate),
-          endDate: new Date(dateRange.endDate),
-        }
-      : undefined;
+    const dates =
+      dateRange.startDate && dateRange.endDate
+        ? {
+            startDate: new Date(dateRange.startDate),
+            endDate: new Date(dateRange.endDate),
+          }
+        : undefined;
 
-    const performance = await this.dashboardService.getProductPerformance(dates);
+    const performance =
+      await this.dashboardService.getProductPerformance(dates);
 
     return {
       message: 'Product performance berhasil diambil',
@@ -161,12 +170,13 @@ export class DashboardController {
   @Get('customers/statistics')
   @HttpCode(HttpStatus.OK)
   async getCustomerStatistics(@Query() dateRange: DateRangeDto) {
-    const dates = dateRange.startDate && dateRange.endDate
-      ? {
-          startDate: new Date(dateRange.startDate),
-          endDate: new Date(dateRange.endDate),
-        }
-      : undefined;
+    const dates =
+      dateRange.startDate && dateRange.endDate
+        ? {
+            startDate: new Date(dateRange.startDate),
+            endDate: new Date(dateRange.endDate),
+          }
+        : undefined;
 
     const stats = await this.dashboardService.getCustomerStatistics(dates);
 

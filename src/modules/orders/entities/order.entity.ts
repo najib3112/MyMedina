@@ -152,6 +152,22 @@ export class Order {
   @Column({ name: 'shipped_at', type: 'timestamp', nullable: true })
   dikirimPada: Date;
 
+  // Shipment-related optional fields
+  @Column({ nullable: true })
+  shipmentWaybill: string;
+
+  @Column({ nullable: true })
+  shipmentCourierCode: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  shipmentCreatedAt: Date;
+
+  @Column({ nullable: true })
+  selectedCourierCode: string;
+
+  @Column({ nullable: true })
+  selectedServiceCode: string;
+
   // ========================================
   // RELATIONSHIPS
   // ========================================
@@ -206,7 +222,7 @@ export class Order {
    * Generate nomor order unik
    * Format: ORD-YYYYMMDD-XXXXXX
    * Implementation: Dihandle di service layer
-   * 
+   *
    * @returns Nomor order yang baru
    */
   generateNomorOrder(): string {
@@ -221,7 +237,7 @@ export class Order {
   /**
    * Hitung total order
    * Total = subtotal + ongkosKirim
-   * 
+   *
    * @returns Total order (decimal)
    */
   hitungTotal(): number {
@@ -231,7 +247,7 @@ export class Order {
   /**
    * Update status order
    * Implementation: Dihandle di service layer dengan validation
-   * 
+   *
    * @param statusBaru Status order yang baru
    */
   updateStatus(statusBaru: OrderStatus): void {
@@ -252,7 +268,7 @@ export class Order {
 
   /**
    * Ambil semua items dalam order
-   * 
+   *
    * @returns Array dari OrderItem
    */
   ambilItems(): OrderItem[] {
@@ -261,7 +277,7 @@ export class Order {
 
   /**
    * Ambil semua payments untuk order
-   * 
+   *
    * @returns Array dari Payment
    */
   ambilPayments(): Payment[] {
@@ -270,11 +286,10 @@ export class Order {
 
   /**
    * Ambil shipment untuk order
-   * 
+   *
    * @returns Shipment atau undefined jika belum ada
    */
   ambilShipment(): Shipment | undefined {
     return this.shipment;
   }
 }
-

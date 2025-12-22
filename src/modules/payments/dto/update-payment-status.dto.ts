@@ -25,4 +25,3 @@ export class UpdatePaymentStatusDto {
   @IsOptional()
   signatureKey?: string;
 }
-

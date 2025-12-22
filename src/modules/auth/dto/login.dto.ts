@@ -2,11 +2,11 @@ import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 /**
  * DTO untuk Login Pengguna
- * 
+ *
  * OOP Concepts:
  * - Encapsulation: Data validation rules dalam satu class
  * - Data Transfer Object Pattern: Transfer data antar layers
- * 
+ *
  * Based on: Sequence-Login.puml
  */
 export class LoginDto {
@@ -18,4 +18,3 @@ export class LoginDto {
   @IsNotEmpty({ message: 'Password wajib diisi' })
   password: string;
 }
-

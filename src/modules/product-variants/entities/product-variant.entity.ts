@@ -88,7 +88,7 @@ export class ProductVariant {
    * Ambil harga variant
    * Harga = hargaDasar produk + hargaTambahan variant
    * Implementation: Dihandle di service layer karena butuh akses product.hargaDasar
-   * 
+   *
    * @returns Harga variant (decimal)
    */
   ambilHarga(): number {
@@ -99,7 +99,7 @@ export class ProductVariant {
 
   /**
    * Kurangi stok variant
-   * 
+   *
    * @param kuantitas Jumlah stok yang dikurangi
    */
   kurangiStok(kuantitas: number): void {
@@ -111,7 +111,7 @@ export class ProductVariant {
 
   /**
    * Kembalikan stok variant (misalnya jika order dibatalkan)
-   * 
+   *
    * @param kuantitas Jumlah stok yang dikembalikan
    */
   kembalikanStok(kuantitas: number): void {
@@ -120,11 +120,11 @@ export class ProductVariant {
 
   /**
    * Cek apakah stok tersedia
-   * 
+   *
    * @param kuantitas Jumlah yang dicek (default 1)
    * @returns true jika stok cukup, false jika tidak
    */
   isStokTersedia(kuantitas: number = 1): boolean {
     return this.aktif && this.stok >= kuantitas;
   }
-
+}

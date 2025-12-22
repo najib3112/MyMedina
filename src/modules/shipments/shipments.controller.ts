@@ -1,157 +1,169 @@
+/**
+ * CONTOH IMPLEMENTASI - Shipment Module Integration
+ * 
+ * File ini menunjukkan cara mengintegrasikan Shipment Module
+ * dengan bagian lain dari aplikasi (payments, orders, email, etc)
+ */
 import {
+  Injectable,
+  NotFoundException,
   BadRequestException,
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Post,
-  Put,
-  Query,
-  UseGuards,
+  UnauthorizedException,
+  InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { Role } from '../../common/enums/role.enum';
+import { Repository, MigrationInterface, QueryRunner, TableColumn, Entity, BaseEntity, Column } from 'typeorm';
+import { BiteshipService } from './biteship.service';
 import { ShipmentsService } from './shipments.service';
-import { CheckRatesDto } from './dto/check-rates.dto';
-import { CreateBiteshipOrderDto } from './dto/create-biteship-order.dto';
-import { CreateShipmentDto } from './dto/create-shipment.dto';
-import { UpdateShipmentStatusDto } from './dto/update-shipment-status.dto';
+import { EmailService as SharedEmailService } from '../../shared/email/email.service';
+import { Order } from '../orders/entities/order.entity';
+import { OrderStatus } from '../../common/enums/order-status.enum';
+import { PaymentStatus } from '../../common/enums/payment-status.enum';
+import { Test, TestingModule } from '@nestjs/testing';
 
-@Controller('shipments')
-@UseGuards(JwtAuthGuard)
-export class ShipmentsController {
-  constructor(private readonly shipmentsService: ShipmentsService) {}
+// ============================================================================
+// 1. PAYMENT WEBHOOK - Saat Payment Berhasil (Midtrans Callback)
+// ============================================================================
 
-  /**
-   * POST /shipments/check-rates - Cek Ongkir
-   */
-  @Post('check-rates')
-  @HttpCode(HttpStatus.OK)
-  async cekOngkir(@Body() checkRatesDto: CheckRatesDto) {
-    const rates = await this.shipmentsService.cekOngkir(checkRatesDto);
-    return {
-      message: 'Berhasil cek ongkir',
-      data: rates,
-    };
-  }
+// payments.service.ts
+@Injectable()
+export class PaymentsService {
+  private readonly logger = new Logger(PaymentsService.name);
+  constructor(
+    private ordersRepository: Repository<Order>,
+    private shipmentService: ShipmentsService,
+    private emailService: SharedEmailService,
+  ) {}
 
   /**
-   * POST /shipments - Create Shipment (Manual)
+   * Handle payment callback dari Midtrans
+   * CRITICAL: Call shipment order creation di sini
    */
-  @Post()
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN, Role.OWNER)
-  @HttpCode(HttpStatus.CREATED)
-  async buatPengiriman(@Body() createShipmentDto: CreateShipmentDto) {
-    const shipment =
-      await this.shipmentsService.buatPengiriman(createShipmentDto);
+  async handleMidtransCallback(transactionData: any) {
+    const { order_id, transaction_status } = transactionData;
+    
+    // Get order
+    const order = await this.ordersRepository.findOne({
+      where: { nomorOrder: order_id },
+      relations: ['user', 'items', 'address'],
+    });
 
-    return {
-      message: 'Pengiriman berhasil dibuat',
-      shipment,
-    };
-  }
-
-  /**
-   * POST /shipments/create-with-biteship - Buat Shipment via Biteship
-   */
-  @Post('create-with-biteship')
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN, Role.OWNER)
-  @HttpCode(HttpStatus.CREATED)
-  async buatPengirimanDenganBiteship(
-    @Body() createBiteshipOrderDto: CreateBiteshipOrderDto,
-  ) {
-    const shipment = await this.shipmentsService.buatPengirimanDenganBiteship(
-      createBiteshipOrderDto,
-    );
-    return {
-      message: 'Shipment berhasil dibuat via Biteship',
-      shipment,
-    };
-  }
-
-  /**
-   * GET /shipments/locations/search - Cari Lokasi
-   * NOTE: Specific routes must be before generic :id routes
-   */
-  @Get('locations/search')
-  async cariLokasi(@Query('q') query: string) {
-    if (!query) {
-      throw new BadRequestException('Query parameter "q" diperlukan');
+    if (!order) {
+      throw new NotFoundException('Order not found');
     }
 
-    const locations = await this.shipmentsService.cariLokasi(query);
-    return {
-      message: 'Berhasil cari lokasi',
-      data: locations,
-    };
+    // Update payment status
+    if (transaction_status === 'capture' || transaction_status === 'settlement') {
+      order.status = OrderStatus.PAID;
+      // Mark paid timestamp instead of non-existing paymentStatus column
+      order.dibayarPada = new Date();
+      await this.ordersRepository.save(order);
+
+      this.logger.log(`Payment success for order ${order.id}`, PaymentsService.name);
+
+      // ================================================================
+      // PENTING: Langsung create shipment order di Biteship
+      // ================================================================
+      try {
+        const shipmentResult = await this.shipmentService.createShipment(order);
+        
+        // Simpan waybill ke order
+        order.shipmentWaybill = shipmentResult.data.waybill;
+        order.shipmentCourierCode = shipmentResult.data.courier_code;
+        order.shipmentCreatedAt = new Date();
+        await this.ordersRepository.save(order);
+
+        // Send email dengan waybill
+        await this.emailService.sendWaybillEmail(
+          order.user.email,
+          order,
+          shipmentResult.data.waybill,
+        );
+
+        this.logger.log(`Shipment created: Waybill ${shipmentResult.data.waybill}`, PaymentsService.name);
+      } catch (error) {
+        this.logger.error('Failed to create shipment order', (error && error.message) || error, PaymentsService.name);
+        // Handle gracefully - user sudah bayar, jangan fail
+        // Bisa retry nanti via manual trigger
+      }
+    }
+  }
+}
+
+// Shipment service is implemented in src/modules/shipments/shipments.service.ts
+// Use that service via DI; do not redeclare it here to avoid runtime initialization errors.
+
+/*
+  Frontend checkout flow example removed from server-side file.
+  Keep frontend/browser code in client app to avoid mixing runtime environments.
+*/
+
+/* Tracking component (Angular) removed from server code. Keep UI components in client app. */
+
+/* Email sending utility removed — use shared/email EmailService instead (imported as SharedEmailService). */
+
+/* Duplicated Order entity and migration removed from this example file. Real definitions exist in src/modules/orders/entities/order.entity.ts and migrations folder. */
+
+// ============================================================================
+// 8. ERROR HANDLING
+// ============================================================================
+
+// Helper to call Biteship and normalize errors
+async function callBiteshipCreate(biteshipService: BiteshipService, orderData: any) {
+  try {
+    const result = await biteshipService.createOrder(orderData);
+    return result;
+  } catch (error) {
+    if (error.response?.status === 400) {
+      // Bad request - invalid data format
+      throw new BadRequestException(error.response.data.message);
+    } else if (error.response?.status === 401) {
+      // Unauthorized - invalid API key
+      throw new UnauthorizedException('Biteship API key invalid');
+    } else if (error.response?.status === 500) {
+      // Biteship server error - retry later
+      throw new InternalServerErrorException(
+        'Shipment service temporarily unavailable',
+      );
+    }
+    throw error;
+  }
+}
+
+// ============================================================================
+// 9. TESTING
+// ============================================================================
+
+import { Controller, Post, Body, Get, Query, Param } from '@nestjs/common';
+
+@Controller('shipment')
+export class ShipmentController {
+  constructor(
+    private readonly shipmentsService: ShipmentsService,
+    private readonly biteshipService: BiteshipService,
+  ) {}
+
+  @Post('rates')
+  async getRates(@Body() body: any) {
+    return await this.biteshipService.getRates(body);
   }
 
-  /**
-   * GET /shipments/order/:orderId/track - Track Shipment by Order ID
-   * NOTE: Specific routes must be before generic :id routes
-   */
-  @Get('order/:orderId/track')
-  async lacakPengiriman(@Param('orderId') orderId: string) {
-    const shipment =
-      await this.shipmentsService.ambilPengirimanByOrderId(orderId);
-
-    return {
-      message: 'Berhasil melacak pengiriman',
-      shipment,
-    };
+  @Get('areas')
+  async getAreas(@Query('input') input: string) {
+    return await this.biteshipService.cariLokasi(input, 'ID');
   }
 
-  /**
-   * GET /shipments/:id/tracking - Tracking dari Biteship
-   * NOTE: Routes with additional params must be before generic :id routes
-   */
-  @Get(':id/tracking')
-  async trackingShipment(@Param('id') id: string) {
-    const tracking = await this.shipmentsService.trackingDariBiteship(id);
-    return {
-      message: 'Berhasil tracking shipment',
-      data: tracking,
-    };
+  @Post('order')
+  async createOrder(@Body() body: any) {
+    // If orderId present, create shipment via ShipmentsService which will create Biteship order and record Shipment
+    if (body && body.orderId) {
+      return await this.shipmentsService.buatPengirimanDenganBiteship(body);
+    }
+    return await this.biteshipService.createOrder(body);
   }
 
-  /**
-   * GET /shipments/:id - Get Shipment by ID
-   * NOTE: This is the most generic GET route, must be last
-   */
-  @Get(':id')
-  async ambilPengirimanById(@Param('id') id: string) {
-    const shipment = await this.shipmentsService.ambilPengirimanById(id);
-
-    return {
-      message: 'Berhasil mengambil detail pengiriman',
-      shipment,
-    };
-  }
-
-  /**
-   * PUT /shipments/:id/status - Update Shipment Status
-   */
-  @Put(':id/status')
-  @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN, Role.OWNER)
-  async updateStatusPengiriman(
-    @Param('id') id: string,
-    @Body() updateShipmentStatusDto: UpdateShipmentStatusDto,
-  ) {
-    const shipment = await this.shipmentsService.updateStatusPengiriman(
-      id,
-      updateShipmentStatusDto,
-    );
-
-    return {
-      message: 'Status pengiriman berhasil diupdate',
-      shipment,
-    };
+  @Get('tracking/:waybill/:courier')
+  async tracking(@Param('waybill') waybill: string, @Param('courier') courier: string) {
+    return await this.biteshipService.trackingShipment(waybill, courier);
   }
 }

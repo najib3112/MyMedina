@@ -1,7 +1,7 @@
 /**
  * Product Status Enum
  * Defines the availability status of products
- * 
+ *
  * Based on: ClassDiagram-MyMedina-v4-SIMPLIFIED.puml
  */
 export enum ProductStatus {
@@ -20,4 +20,3 @@ export enum ProductStatus {
    */
   DISCONTINUED = 'DISCONTINUED',
 }
-

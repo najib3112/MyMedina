@@ -151,4 +151,15 @@ export class BiteshipService {
       );
     }
   }
+
+  // Compatibility wrappers used by higher-level code/tests in repo
+  async getRates(payload: any) {
+    // Adapt payload if necessary; for now assume payload matches BiteshipRatesRequest
+    return await this.cekOngkir(payload);
+  }
+
+  async createOrder(payload: any) {
+    // Adapt payload if necessary; for now assume payload matches BiteshipOrderRequest
+    return await this.buatOrderShipment(payload);
+  }
 }

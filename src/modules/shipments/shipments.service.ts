@@ -35,7 +35,9 @@ export class ShipmentsService {
   /**
    * Create Shipment (Manual - Original)
    */
-  async buatPengiriman(createShipmentDto: CreateShipmentDto): Promise<Shipment> {
+  async buatPengiriman(
+    createShipmentDto: CreateShipmentDto,
+  ): Promise<Shipment> {
     const { orderId, kurir, layanan, nomorResi, biaya } = createShipmentDto;
 
     const order = await this.orderRepository.findOne({
@@ -155,9 +157,8 @@ export class ShipmentsService {
     };
 
     // Create order to Biteship
-    const biteshipOrder = await this.biteshipService.buatOrderShipment(
-      biteshipOrderData,
-    );
+    const biteshipOrder =
+      await this.biteshipService.buatOrderShipment(biteshipOrderData);
 
     // Create shipment in database
     const shipment = this.shipmentRepository.create({
@@ -248,12 +249,12 @@ export class ShipmentsService {
     shipment.status = status;
 
     if (status === ShipmentStatus.SHIPPED) {
-      shipment.tandaiSebagaiDikirim();
+      shipment.tandaSebagaiDikirim();
       const order = shipment.order;
       order.status = OrderStatus.SHIPPED;
       await this.orderRepository.save(order);
     } else if (status === ShipmentStatus.DELIVERED) {
-      shipment.tandaiSebagaiDiterima();
+      shipment.tandaSebagaiDiterima();
       const order = shipment.order;
       order.status = OrderStatus.COMPLETED;
       order.diselesaikanPada = new Date();
@@ -293,13 +294,63 @@ export class ShipmentsService {
   }
 
   /**
+   * Helper: Create shipment in Biteship from an Order (used by payment webhook flow)
+   */
+  async createShipment(order: Order) {
+    const shipper = {
+      name: 'MyMedina Store',
+      email: 'store@mymedina.com',
+      phone: '081234567890',
+      address: 'Jl. Warehouse No. 123, Jakarta Pusat',
+      country: 'ID',
+      province: 'DKI Jakarta',
+      city: 'Jakarta Pusat',
+      postal_code: '12345',
+    };
+
+    const receiver = {
+      name: order.namaPenerima,
+      email: order.user?.email,
+      phone: order.teleponPenerima,
+      address: `${order.alamatBaris1} ${order.alamatBaris2 || ''}`,
+      country: 'ID',
+      province: order.provinsi,
+      city: order.kota,
+      postal_code: order.kodePos,
+    };
+
+    const items = (order.items || []).map(item => ({
+      name: item.namaProduct,
+      description: item.namaProduct,
+      quantity: item.kuantitas,
+      weight: 500,
+      value: Number(item.hargaSatuan),
+    }));
+
+    const orderRequest = {
+      reference: order.nomorOrder,
+      shipper,
+      receiver,
+      items,
+      courier_code: (order as any).selectedCourierCode || (order as any).shipmentCourierCode || 'jne',
+      courier_service_code: (order as any).selectedServiceCode || '',
+      notes: order.catatan || '',
+    };
+
+    return await this.biteshipService.createOrder(orderRequest);
+  }
+
+  /**
    * Update tracking info
    * Menggunakan method entity: updateTrackingInfo()
-   * 
+   *
    * @param shipmentId - ID shipment
    * @param nomorResi - Nomor resi baru
    */
-  async updateTrackingInfoShipment(shipmentId: string, nomorResi: string): Promise<Shipment> {
+  async updateTrackingInfoShipment(
+    shipmentId: string,
+    nomorResi: string,
+  ): Promise<Shipment> {
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipmentId },
     });
@@ -317,11 +368,14 @@ export class ShipmentsService {
   /**
    * Update status shipment
    * Menggunakan method entity: updateStatus()
-   * 
+   *
    * @param shipmentId - ID shipment
    * @param statusBaru - Status baru
    */
-  async updateStatusShipment(shipmentId: string, statusBaru: ShipmentStatus): Promise<Shipment> {
+  async updateStatusShipment(
+    shipmentId: string,
+    statusBaru: ShipmentStatus,
+  ): Promise<Shipment> {
     const shipment = await this.shipmentRepository.findOne({
       where: { id: shipmentId },
     });
@@ -339,7 +393,7 @@ export class ShipmentsService {
   /**
    * Tandai shipment sebagai dikirim
    * Menggunakan method entity: tandaSebagaiDikirim()
-   * 
+   *
    * @param shipmentId - ID shipment
    */
   async tandaSebagaiDikirimShipment(shipmentId: string): Promise<Shipment> {
@@ -367,7 +421,7 @@ export class ShipmentsService {
   /**
    * Tandai shipment sebagai diterima
    * Menggunakan method entity: tandaSebagaiDiterima()
-   * 
+   *
    * @param shipmentId - ID shipment
    */
   async tandaSebagaiDiterimaShipment(shipmentId: string): Promise<Shipment> {

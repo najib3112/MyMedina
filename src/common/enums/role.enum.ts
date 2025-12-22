@@ -1,7 +1,7 @@
 /**
  * User Role Enum
  * Defines the different roles in the system
- * 
+ *
  * Based on: ClassDiagram-MyMedina-v4-SIMPLIFIED.puml
  */
 export enum Role {
@@ -20,4 +20,3 @@ export enum Role {
    */
   OWNER = 'OWNER',
 }
-
