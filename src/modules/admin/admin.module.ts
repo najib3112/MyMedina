@@ -5,19 +5,17 @@ import { Payment } from '../payments/entities/payment.entity';
 import { Product } from '../products/entities/product.entity';
 import { User } from '../auth/entities/user.entity';
 import { DashboardController } from './controllers/dashboard.controller';
-import { ReportsController } from './controllers/reports.controller';
 import { DashboardService } from './services/dashboard.service';
-import { ReportsService } from './services/reports.service';
-import { ExportService } from './services/export.service';
 
 /**
  * Admin Module
- * Provides dashboard, analytics, and reporting functionality for admins
+ * Provides dashboard and analytics functionality for admins
+ * Financial reports have been moved to Owner Module
  */
 @Module({
   imports: [TypeOrmModule.forFeature([Order, Payment, Product, User])],
-  controllers: [DashboardController, ReportsController],
-  providers: [DashboardService, ReportsService, ExportService],
-  exports: [DashboardService, ReportsService, ExportService],
+  controllers: [DashboardController],
+  providers: [DashboardService],
+  exports: [DashboardService],
 })
 export class AdminModule {}

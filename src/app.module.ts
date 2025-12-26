@@ -6,6 +6,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { databaseConfig } from './config/database.config';
 import { AuthModule } from './modules/auth/auth.module';
+import { AdminModule } from './modules/admin/admin.module';
+import { OwnerModule } from './modules/owner/owner.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
@@ -43,6 +45,8 @@ import { UploadModule } from './shared/upload/upload.module';
 
     // Feature modules
     AuthModule,
+    AdminModule,
+    OwnerModule,
     CategoriesModule,
     ProductsModule,
     ProductVariantsModule,
