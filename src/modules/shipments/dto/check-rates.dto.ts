@@ -1,43 +1,62 @@
-import { IsString, IsArray, ValidateNested, IsNumber } from 'class-validator';
+// src/shipment/dto/check-rates.dto.ts
+import {
+  IsString,
+  IsNotEmpty,
+  IsArray,
+  ValidateNested,
+  IsNumber,
+  IsOptional,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class RatesItemDto {
   @IsString()
+  @IsNotEmpty({ message: 'Nama item wajib diisi' })
   name: string;
 
   @IsString()
-  description: string;
+  @IsOptional()
+  description?: string;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'Value harus angka' })
+  @IsNotEmpty({ message: 'Value wajib diisi' })
   value: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'Length harus angka' })
+  @IsNotEmpty({ message: 'Length wajib diisi' })
   length: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'Width harus angka' })
+  @IsNotEmpty({ message: 'Width wajib diisi' })
   width: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'Height harus angka' })
+  @IsNotEmpty({ message: 'Height wajib diisi' })
   height: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'Weight harus angka' })
+  @IsNotEmpty({ message: 'Weight wajib diisi' })
   weight: number;
 
-  @IsNumber()
+  @IsNumber({}, { message: 'Quantity harus angka' })
+  @IsNotEmpty({ message: 'Quantity wajib diisi' })
   quantity: number;
 }
 
 export class CheckRatesDto {
   @IsString()
+  @IsNotEmpty({ message: 'origin_area_id wajib diisi' })
   origin_area_id: string;
 
   @IsString()
+  @IsNotEmpty({ message: 'destination_area_id wajib diisi' })
   destination_area_id: string;
 
   @IsString()
-  couriers: string; // comma separated: jne,jnt,sicepat
+  @IsOptional()
+  couriers?: string; // contoh: "jne,jnt,sicepat"
 
-  @IsArray()
+  @IsArray({ message: 'Items harus array' })
   @ValidateNested({ each: true })
   @Type(() => RatesItemDto)
   items: RatesItemDto[];

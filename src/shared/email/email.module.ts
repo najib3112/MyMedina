@@ -28,7 +28,7 @@ import { EmailService } from './email.service';
         transport: {
           host: configService.get<string>('EMAIL_HOST'),
           port: configService.get<number>('EMAIL_PORT'),
-          secure: false, // true for 465, false for other ports
+          secure: true, // true for 465, false for other ports
           auth: {
             user: configService.get<string>('EMAIL_USER'),
             pass: configService.get<string>('EMAIL_PASSWORD'),

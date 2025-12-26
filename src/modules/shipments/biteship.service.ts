@@ -63,10 +63,18 @@ export class BiteshipService {
   constructor(private readonly configService: ConfigService) {
     this.apiKey = this.configService.get<string>('BITESHIP_API_KEY') || '';
 
+    // LOG UNTUK DEBUG (HANYA SHOW 4 KARAKTER TERAKHIR)
+    const maskedKey = this.apiKey 
+      ? `***${this.apiKey.slice(-4)}` 
+      : 'NOT SET';
+    
+    console.log('🔑 Biteship API Key:', maskedKey);
+    console.log('📡 Biteship Base URL:', 'https://api.biteship.com/v1');
+
     this.axiosInstance = axios.create({
       baseURL: 'https://api.biteship.com/v1',
       headers: {
-        Authorization: this.apiKey,
+        Authorization: `Bearer ${this.apiKey}`, // ✅ Gunakan this.apiKey dari config
         'Content-Type': 'application/json',
       },
     });
@@ -77,11 +85,27 @@ export class BiteshipService {
    */
   async cekOngkir(data: BiteshipRatesRequest) {
     try {
+      console.log('📤 Calling Biteship /rates/couriers');
+      console.log('Payload:', JSON.stringify(data, null, 2));
+      
       const response = await this.axiosInstance.post('/rates/couriers', data);
+      
+      console.log('📥 Biteship Response Status:', response.status);
+      console.log('📦 Pricing Data Length:', response.data?.pricing?.length || 0);
+      
       return response.data;
     } catch (error) {
+      console.error('❌ Biteship API Error:');
+      console.error('Status:', error.response?.status);
+      console.error('Data:', JSON.stringify(error.response?.data, null, 2));
+      
       throw new HttpException(
-        error.response?.data?.message || 'Gagal cek ongkir',
+        {
+          message: error.response?.data?.message || 'Gagal cek ongkir dari Biteship',
+          error: error.response?.data?.error,
+          code: error.response?.data?.code,
+          details: error.response?.data
+        },
         error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }

@@ -5,50 +5,56 @@ import {
   IsObject,
   ValidateNested,
   IsOptional,
+  IsArray,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
- * Origin/Destination coordinates for rate calculation
+ * Location DTO with Biteship area_id
  */
 export class LocationDto {
   /**
-   * Country code (e.g., "ID" for Indonesia)
+   * Biteship Area ID (REQUIRED for rate calculation)
+   * Example: "IDNP6IDNC148IDND2321"
+   * Get from /shipment/areas endpoint
    */
-  @IsString({ message: 'Country harus berupa string' })
-  @IsNotEmpty({ message: 'Country wajib diisi' })
-  country: string;
+  @IsString({ message: 'Area ID harus berupa string' })
+  @IsOptional()
+  area_id?: string;
 
   /**
-   * Administrative level 1 (e.g., province name)
+   * Province name (Admin Level 1)
+   * Example: "DKI Jakarta", "Jawa Barat"
    */
   @IsString({ message: 'Admin level 1 harus berupa string' })
   @IsNotEmpty({ message: 'Admin level 1 wajib diisi' })
   admin_level_1: string;
 
   /**
-   * Administrative level 2 (e.g., city name)
+   * City/District name (Admin Level 2)
+   * Example: "Jakarta Selatan", "Bandung"
    */
   @IsString({ message: 'Admin level 2 harus berupa string' })
   @IsNotEmpty({ message: 'Admin level 2 wajib diisi' })
   admin_level_2: string;
 
   /**
-   * Postal code (optional)
+   * Postal code (5 digits)
+   * Example: "12160"
    */
   @IsString({ message: 'Postal code harus berupa string' })
   @IsOptional()
   postal_code?: string;
 
   /**
-   * Latitude (optional, for GPS precision)
+   * Latitude (from Biteship area search)
    */
   @IsNumber({}, { message: 'Latitude harus berupa number' })
   @IsOptional()
   latitude?: number;
 
   /**
-   * Longitude (optional, for GPS precision)
+   * Longitude (from Biteship area search)
    */
   @IsNumber({}, { message: 'Longitude harus berupa number' })
   @IsOptional()
@@ -56,52 +62,75 @@ export class LocationDto {
 }
 
 /**
- * Item/Barang yang akan dikirim
+ * Item/Product to be shipped
  */
 export class ItemDto {
   /**
-   * Nama item
+   * Product name
    */
   @IsString({ message: 'Name harus berupa string' })
   @IsNotEmpty({ message: 'Name wajib diisi' })
   name: string;
 
   /**
-   * Deskripsi item (optional)
+   * Product description (optional)
    */
   @IsString({ message: 'Description harus berupa string' })
   @IsOptional()
   description?: string;
 
   /**
-   * Jumlah item
+   * Quantity
    */
   @IsNumber({}, { message: 'Quantity harus berupa number' })
   @IsNotEmpty({ message: 'Quantity wajib diisi' })
   quantity: number;
 
   /**
-   * Berat item dalam gram
+   * Weight in grams
+   * Example: 500 (for 500 grams)
    */
   @IsNumber({}, { message: 'Weight harus berupa number' })
   @IsNotEmpty({ message: 'Weight wajib diisi' })
   weight: number;
 
   /**
-   * Nilai item (untuk asuransi)
+   * Item value (for insurance)
+   * Example: 100000 (Rp 100,000)
    */
   @IsNumber({}, { message: 'Value harus berupa number' })
   @IsOptional()
   value?: number;
+
+  /**
+   * Length in cm
+   */
+  @IsNumber({}, { message: 'Length harus berupa number' })
+  @IsOptional()
+  length?: number;
+
+  /**
+   * Width in cm
+   */
+  @IsNumber({}, { message: 'Width harus berupa number' })
+  @IsOptional()
+  width?: number;
+
+  /**
+   * Height in cm
+   */
+  @IsNumber({}, { message: 'Height harus berupa number' })
+  @IsOptional()
+  height?: number;
 }
 
 /**
- * DTO for calculating shipping rates
+ * Rate calculation request DTO
  * Used in: POST /shipment/rates
  */
 export class RateRequestDto {
   /**
-   * Origin location
+   * Origin location (your store)
    */
   @IsObject({ message: 'Origin harus berupa object' })
   @ValidateNested()
@@ -110,7 +139,7 @@ export class RateRequestDto {
   origin: LocationDto;
 
   /**
-   * Destination location
+   * Destination location (customer)
    */
   @IsObject({ message: 'Destination harus berupa object' })
   @ValidateNested()
@@ -119,17 +148,20 @@ export class RateRequestDto {
   destination: LocationDto;
 
   /**
-   * List of items being shipped
+   * Items being shipped
    */
+  @IsArray({ message: 'Items harus berupa array' })
   @IsNotEmpty({ message: 'Items wajib diisi' })
   @ValidateNested({ each: true })
   @Type(() => ItemDto)
   items: ItemDto[];
 
   /**
-   * Preferred couriers (optional, e.g., ["jne", "tiki"])
+   * Preferred couriers (optional)
+   * Example: ["jne", "jnt", "sicepat"]
    * If not provided, all available couriers will be returned
    */
+  @IsArray({ message: 'Couriers harus berupa array' })
   @IsOptional()
   couriers?: string[];
 }

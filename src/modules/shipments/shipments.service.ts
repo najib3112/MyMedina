@@ -26,13 +26,6 @@ export class ShipmentsService {
   ) {}
 
   /**
-   * Cek Ongkir via Biteship
-   */
-  async cekOngkir(checkRatesDto: CheckRatesDto) {
-    return await this.biteshipService.cekOngkir(checkRatesDto);
-  }
-
-  /**
    * Create Shipment (Manual - Original)
    */
   async buatPengiriman(
