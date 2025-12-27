@@ -31,6 +31,10 @@ import { OrderStatus } from '../../common/enums/order-status.enum';
  * - Controller Pattern: Handles HTTP requests
  * - Dependency Injection: OrdersService injected
  * - Guard Pattern: Authentication and authorization
+ * 
+ * ⚠️ IMPORTANT: Route Order Matters!
+ * - Static routes (admin/all) MUST come BEFORE dynamic routes (:id)
+ * - Otherwise "admin" will be treated as an :id parameter
  */
 @Controller('orders')
 @UseGuards(JwtAuthGuard)
@@ -70,25 +74,11 @@ export class OrdersController {
   }
 
   /**
-   * GET /orders/:id - Get Order by ID
-   * Customer (own orders) or Admin (all orders)
-   */
-  @Get(':id')
-  async ambilOrderById(@Request() req, @Param('id') id: string) {
-    const userId = req.user.userId;
-    const isAdmin =
-      req.user.role === Role.ADMIN || req.user.role === Role.OWNER;
-    const order = await this.ordersService.ambilOrderById(id, userId, isAdmin);
-
-    return {
-      message: 'Berhasil mengambil detail order',
-      order,
-    };
-  }
-
-  /**
-   * GET /admin/orders - Get All Orders (Admin)
+   * ✅ GET /orders/admin/all - Get All Orders (Admin)
    * Admin/Owner only
+   * 
+   * ⚠️ MUST BE BEFORE /:id route!
+   * Route statis harus di atas route dinamis
    */
   @Get('admin/all')
   @UseGuards(RolesGuard)
@@ -107,6 +97,26 @@ export class OrdersController {
     return {
       message: 'Berhasil mengambil daftar semua order',
       ...result,
+    };
+  }
+
+  /**
+   * GET /orders/:id - Get Order by ID
+   * Customer (own orders) or Admin (all orders)
+   * 
+   * ⚠️ MUST BE AFTER static routes like admin/all
+   * Jika di atas, "admin" akan dianggap sebagai :id
+   */
+  @Get(':id')
+  async ambilOrderById(@Request() req, @Param('id') id: string) {
+    const userId = req.user.userId;
+    const isAdmin =
+      req.user.role === Role.ADMIN || req.user.role === Role.OWNER;
+    const order = await this.ordersService.ambilOrderById(id, userId, isAdmin);
+
+    return {
+      message: 'Berhasil mengambil detail order',
+      order,
     };
   }
 

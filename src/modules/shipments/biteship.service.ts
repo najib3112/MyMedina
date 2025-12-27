@@ -161,18 +161,34 @@ export class BiteshipService {
   /**
    * Search Area/Location
    */
-  async cariLokasi(query: string, countries?: string) {
+  /**
+ * Search Area/Location
+ */
+  async cariLokasi(query: string, countries: string = 'ID') {
+    if (!query || query.trim().length < 3) {
+      return { areas: [] };
+    }
+
     try {
-      const params: any = { input: query };
+      const params: any = { input: query.trim() };
       if (countries) params.countries = countries;
 
+      // ✅ PERBAIKAN UTAMA: Gunakan /maps/areas
       const response = await this.axiosInstance.get('/maps/areas', { params });
-      return response.data;
+
+      console.log('✅ Biteship Areas Success:', response.data);
+
+      return {
+        areas: response.data?.areas || response.data || []
+      };
     } catch (error) {
-      throw new HttpException(
-        error.response?.data?.message || 'Gagal cari lokasi',
-        error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      console.error('❌ Biteship search areas error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+
+      return { areas: [] }; // Jangan throw error, cukup return kosong
     }
   }
 

@@ -32,107 +32,116 @@ import { ProductVariant } from '../../product-variants/entities/product-variant.
  * - Database columns: English snake_case (name, description, base_price, etc.)
  */
 @Entity('products')
-export class Product {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  export class Product {
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
-  @Column({ name: 'category_id' })
-  categoryId: string;
+    @Column({ name: 'category_id' })
+    categoryId: string;
 
-  @Column({ length: 255 })
-  nama: string;
+    @Column({ length: 255 })
+    nama: string;
 
-  @Column({ unique: true, length: 255 })
-  slug: string;
+    @Column({ unique: true, length: 255 })
+    slug: string;
 
-  @Column({ type: 'text', nullable: true })
-  deskripsi: string;
+    @Column({ type: 'text', nullable: true })
+    deskripsi: string;
 
-  @Column({ name: 'base_price', type: 'decimal', precision: 12, scale: 2 })
-  hargaDasar: number;
+    @Column({ name: 'base_price', type: 'decimal', precision: 12, scale: 2 })
+    hargaDasar: number;
 
-  @Column({ type: 'decimal', precision: 8, scale: 2 })
-  berat: number;
+    @Column({ name: 'weight', type: 'decimal', precision: 8, scale: 2 })
+    berat: number;
 
-  @Column({
-    type: 'enum',
-    enum: ProductStatus,
-    default: ProductStatus.READY,
-  })
-  status: ProductStatus;
+    @Column({ name: 'length', type: 'decimal', precision: 8, scale: 2 })
+    panjang: number;
 
-  @Column({ default: true })
-  aktif: boolean;
+    @Column({ name: 'width', type: 'decimal', precision: 8, scale: 2 })
+    lebar: number;
 
-  @Column({ name: 'image_url', length: 500, nullable: true })
-  gambarUrl: string;
+    @Column({ name: 'height', type: 'decimal', precision: 8, scale: 2 })
+    tinggi: number;
 
-  @CreateDateColumn({ name: 'created_at' })
-  dibuatPada: Date;
+    @Column({
+      type: 'enum',
+      enum: ProductStatus,
+      default: ProductStatus.READY,
+    })
+    status: ProductStatus;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  diupdatePada: Date;
+    @Column({ default: true })
+    aktif: boolean;
 
-  @DeleteDateColumn({ name: 'deleted_at' })
-  dihapusPada: Date;
+    @Column({ name: 'image_url', length: 500, nullable: true })
+    gambarUrl: string;
 
-  // ========================================
-  // RELATIONSHIPS
-  // ========================================
+    @CreateDateColumn({ name: 'created_at' })
+    dibuatPada: Date;
 
-  /**
-   * Category Relationship
-   * Setiap produk belongs to satu kategori
-   */
-  @ManyToOne(() => Category, {
-    nullable: false,
-    onDelete: 'RESTRICT', // Prevent category deletion if has products
-  })
-  @JoinColumn({ name: 'category_id' })
-  category: Category;
+    @UpdateDateColumn({ name: 'updated_at' })
+    diupdatePada: Date;
 
-  /**
-   * Product Variants Relationship
-   * Satu produk bisa punya banyak variant (size, color)
-   * Based on: Class Diagram - Product has 1..* ProductVariant
-   */
-  @OneToMany(() => ProductVariant, (variant) => variant.product)
-  variants: ProductVariant[];
+    @DeleteDateColumn({ name: 'deleted_at' })
+    dihapusPada: Date;
 
-  // ========================================
-  // METHODS (sesuai Class Diagram)
-  // ========================================
+    // ========================================
+    // RELATIONSHIPS
+    // ======================================== 
 
-  /**
-   * Ambil semua variants dari product
-   *
-   * @returns Array dari ProductVariant
-   */
-  ambilVariants(): ProductVariant[] {
-    return this.variants || [];
-  }
+    /**
+     * Category Relationship
+     * Setiap produk belongs to satu kategori
+     */
+    @ManyToOne(() => Category, {
+      nullable: false,
+      onDelete: 'RESTRICT', // Prevent category deletion if has products
+    })
+    @JoinColumn({ name: 'category_id' })
+    category: Category;
 
-  /**
-   * Ambil total stok tersedia dari semua variants
-   *
-   * @returns Total stok (integer)
-   */
-  ambilStokTersedia(): number {
-    if (!this.variants || this.variants.length === 0) {
-      return 0;
+    /**
+     * Product Variants Relationship
+     * Satu produk bisa punya banyak variant (size, color)
+     * Based on: Class Diagram - Product has 1..* ProductVariant
+     */
+    @OneToMany(() => ProductVariant, (variant) => variant.product)
+    variants: ProductVariant[];
+
+    // ========================================
+    // METHODS (sesuai Class Diagram)
+    // ========================================
+
+    /**
+     * Ambil semua variants dari product
+     *
+     * @returns Array dari ProductVariant
+     */
+    ambilVariants(): ProductVariant[] {
+      return this.variants || [];
     }
-    return this.variants.reduce(
-      (total, variant) => total + (variant.stok || 0),
-      0,
-    );
-  }
 
-  /**
-   * Cek apakah product tersedia (ada stok dan aktif)
-   *
-   * @returns true jika tersedia, false jika tidak
-   */
-  isTersedia(): boolean {
-    return this.aktif && this.ambilStokTersedia() > 0;
+    /**
+     * Ambil total stok tersedia dari semua variants
+     *
+     * @returns Total stok (integer)
+     */
+    ambilStokTersedia(): number {
+      if (!this.variants || this.variants.length === 0) {
+        return 0;
+      }
+      return this.variants.reduce(
+        (total, variant) => total + (variant.stok || 0),
+        0,
+      );
+    }
+
+    /**
+     * Cek apakah product tersedia (ada stok dan aktif)
+     *
+     * @returns true jika tersedia, false jika tidak
+     */
+    isTersedia(): boolean {
+      return this.aktif && this.ambilStokTersedia() > 0;
+    }
   }
-}

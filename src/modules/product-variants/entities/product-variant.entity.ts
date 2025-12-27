@@ -12,20 +12,7 @@ import { Product } from '../../products/entities/product.entity';
 /**
  * ProductVariant Entity
  *
- * OOP Concepts:
- * - Encapsulation: Product variant data and relationships in one class
- * - Abstraction: Hides database implementation details
- * - Relationships: ManyToOne with Product
- *
- * Design Pattern:
- * - Active Record Pattern (via TypeORM)
- *
- * Based on: Database/schema-simplified.sql (product_variants table)
- *
- * Naming Convention: Hybrid Approach
- * - Class name: English (ProductVariant)
- * - Properties: Bahasa Indonesia (ukuran, warna, stok, etc.)
- * - Database columns: English snake_case (size, color, stock, etc.)
+ * Menyimpan data variant produk seperti ukuran, warna, stok, dan harga khusus.
  */
 @Entity('product_variants')
 export class ProductVariant {
@@ -44,20 +31,43 @@ export class ProductVariant {
   @Column({ length: 50 })
   warna: string;
 
-  @Column({ default: 0 })
+  @Column({ type: 'int', default: 0 })
   stok: number;
 
+  /**
+   * Harga tambahan untuk variant ini (misal: +50.000 karena ukuran besar atau warna spesial)
+   */
   @Column({
     name: 'price_additional',
     type: 'decimal',
-    precision: 12,
+    precision: 15,
     scale: 2,
     nullable: true,
+    default: null,
   })
-  hargaTambahan: number;
+  hargaTambahan: number | null;
 
-  @Column({ default: true })
+  /**
+   * Harga override: jika diisi, harga variant akan menggunakan nilai ini secara total
+   * (mengabaikan hargaDasar produk + hargaTambahan)
+   *
+   * Kosong/null → gunakan logika harga normal (hargaDasar produk + hargaTambahan)
+   */
+  @Column({
+    name: 'price_override',
+    type: 'decimal',
+    precision: 15,
+    scale: 2,
+    nullable: true,
+    default: null,
+  })
+  hargaOverride: number | null;
+
+  @Column({ type: 'boolean', default: true })
   aktif: boolean;
+
+  @Column({ nullable: true, length: 500 })
+  gambar?: string;
 
   @CreateDateColumn({ name: 'created_at' })
   dibuatPada: Date;
@@ -69,62 +79,71 @@ export class ProductVariant {
   // RELATIONSHIPS
   // ========================================
 
-  /**
-   * Product Relationship
-   * Setiap variant belongs to satu produk
-   */
   @ManyToOne(() => Product, (product) => product.variants, {
     nullable: false,
-    onDelete: 'CASCADE', // Delete variants when product is deleted
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'product_id' })
   product: Product;
 
   // ========================================
-  // METHODS (sesuai Class Diagram)
+  // METHODS
   // ========================================
 
   /**
-   * Ambil harga variant
-   * Harga = hargaDasar produk + hargaTambahan variant
-   * Implementation: Dihandle di service layer karena butuh akses product.hargaDasar
+   * Ambil harga akhir variant
    *
-   * @returns Harga variant (decimal)
+   * Logika prioritas:
+   * 1. Jika hargaOverride terisi → pakai nilai itu (override total)
+   * 2. Jika tidak → hargaDasar produk + hargaTambahan variant
+   *
+   * @returns Harga akhir dalam bentuk number (decimal aman)
    */
   ambilHarga(): number {
-    // Note: Actual implementation needs product reference
-    // Base price from product + additional price from variant
-    return Number(this.hargaTambahan || 0);
+    // Prioritas 1: hargaOverride
+    if (this.hargaOverride !== null) {
+      return Number(this.hargaOverride);
+    }
+
+    // Prioritas 2: harga dasar produk + tambahan variant
+    const hargaDasar = this.product?.hargaDasar ?? 0;
+    const tambahan = this.hargaTambahan ?? 0;
+
+    return Number(hargaDasar) + Number(tambahan);
   }
 
   /**
    * Kurangi stok variant
    *
-   * @param kuantitas Jumlah stok yang dikurangi
+   * @param kuantitas Jumlah yang dikurangi
    */
   kurangiStok(kuantitas: number): void {
-    this.stok -= kuantitas;
-    if (this.stok < 0) {
-      this.stok = 0;
+    if (kuantitas > 0) {
+      this.stok -= kuantitas;
+      if (this.stok < 0) {
+        this.stok = 0;
+      }
     }
   }
 
   /**
-   * Kembalikan stok variant (misalnya jika order dibatalkan)
+   * Kembalikan stok variant (misalnya saat order dibatalkan)
    *
-   * @param kuantitas Jumlah stok yang dikembalikan
+   * @param kuantitas Jumlah yang dikembalikan
    */
   kembalikanStok(kuantitas: number): void {
-    this.stok += kuantitas;
+    if (kuantitas > 0) {
+      this.stok += kuantitas;
+    }
   }
 
   /**
-   * Cek apakah stok tersedia
+   * Cek apakah stok cukup dan variant aktif
    *
-   * @param kuantitas Jumlah yang dicek (default 1)
-   * @returns true jika stok cukup, false jika tidak
+   * @param kuantitas Jumlah yang dibutuhkan (default 1)
+   * @returns true jika stok tersedia
    */
   isStokTersedia(kuantitas: number = 1): boolean {
-    return this.aktif && this.stok >= kuantitas;
+    return this.aktif && this.stok >= kuantitas && kuantitas > 0;
   }
 }

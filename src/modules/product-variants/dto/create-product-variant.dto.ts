@@ -49,4 +49,8 @@ export class CreateProductVariantDto {
   @IsOptional()
   @IsBoolean({ message: 'Aktif harus berupa boolean' })
   aktif?: boolean;
+
+  @IsOptional()
+  @IsString()
+  gambar?: string;
 }

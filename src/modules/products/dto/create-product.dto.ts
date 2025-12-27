@@ -48,10 +48,25 @@ export class CreateProductDto {
   @Min(0, { message: 'Harga dasar tidak boleh negatif' })
   hargaDasar: number;
 
-  @IsNotEmpty({ message: 'Berat produk harus diisi' })
-  @IsNumber({}, { message: 'Berat produk harus berupa angka' })
-  @Min(0, { message: 'Berat produk tidak boleh negatif' })
-  berat: number;
+    @IsNotEmpty({ message: 'Berat produk harus diisi' })
+    @IsNumber({}, { message: 'Berat produk harus berupa angka' })
+    @Min(0, { message: 'Berat produk tidak boleh negatif' })
+    berat: number;
+
+    @IsNotEmpty({ message: 'Panjang produk harus diisi' })
+    @IsNumber({}, { message: 'Panjang produk harus berupa angka' })
+    @Min(0, { message: 'Panjang produk tidak boleh negatif' })
+    panjang: number;
+
+    @IsNotEmpty({ message: 'Lebar produk harus diisi' })
+    @IsNumber({}, { message: 'Lebar produk harus berupa angka' })
+    @Min(0, { message: 'Lebar produk tidak boleh negatif' })
+    lebar: number;
+
+    @IsNotEmpty({ message: 'Tinggi produk harus diisi' })
+    @IsNumber({}, { message: 'Tinggi produk harus berupa angka' })
+    @Min(0, { message: 'Tinggi produk tidak boleh negatif' })
+    tinggi: number;
 
   @IsOptional()
   @IsEnum(ProductStatus, { message: 'Status produk tidak valid' })

@@ -179,9 +179,7 @@ export class ProductVariantsService {
    */
   async ambilHargaVariant(variantId: string): Promise<number> {
     const variant = await this.ambilVariantById(variantId);
-
-    // Gunakan method entity (seharusnya include product)
-    return variant.ambilHarga();
+    return variant.ambilHarga();  // <-- Ini yang pakai logika di atas
   }
 
   /**

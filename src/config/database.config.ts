@@ -1,4 +1,5 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { DataSourceOptions } from 'typeorm';
 
 /**
  * Database Configuration
@@ -8,7 +9,7 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
  * - Encapsulation: Database config in one place
  * - Single Responsibility: Only handles database configuration
  */
-export const databaseConfig = (): TypeOrmModuleOptions => ({
+export const databaseConfig = (): DataSourceOptions => ({
   type: 'postgres',
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432', 10),
@@ -16,8 +17,7 @@ export const databaseConfig = (): TypeOrmModuleOptions => ({
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_NAME || 'mymedina',
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  synchronize: process.env.NODE_ENV === 'development', // Auto-create tables in development
-  logging: process.env.NODE_ENV === 'development',
+  logging: ['error', 'warn'], // Only log errors and warnings, not SELECT queries
   migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
-  migrationsRun: false,
+  migrationsRun: true, // Auto-run migrations on startup
 });

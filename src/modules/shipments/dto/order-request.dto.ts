@@ -184,6 +184,27 @@ export class OrderItemDto {
   weight: number;
 
   /**
+   * Panjang item dalam cm
+   */
+  @IsNumber({}, { message: 'Length harus berupa number' })
+  @IsNotEmpty({ message: 'Length wajib diisi' })
+  length: number;
+
+  /**
+   * Lebar item dalam cm
+   */
+  @IsNumber({}, { message: 'Width harus berupa number' })
+  @IsNotEmpty({ message: 'Width wajib diisi' })
+  width: number;
+
+  /**
+   * Tinggi item dalam cm
+   */
+  @IsNumber({}, { message: 'Height harus berupa number' })
+  @IsNotEmpty({ message: 'Height wajib diisi' })
+  height: number;
+
+  /**
    * Nilai item per unit (untuk asuransi)
    */
   @IsNumber({}, { message: 'Value harus berupa number' })

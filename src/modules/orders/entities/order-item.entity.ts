@@ -56,16 +56,16 @@ export class OrderItem {
   // PRODUCT/VARIANT SNAPSHOT (Denormalized)
   // ========================================
 
-  @Column({ name: 'product_name', length: 255 })
+  @Column({ name: 'product_name', length: 255,nullable: true })
   namaProduct: string;
 
-  @Column({ name: 'product_sku', length: 100 })
+  @Column({ name: 'product_sku', length: 100, nullable: true })
   skuProduct: string;
 
-  @Column({ name: 'variant_size', length: 50 })
+  @Column({ name: 'variant_size', length: 50, nullable: true })
   ukuranVariant: string;
 
-  @Column({ name: 'variant_color', length: 50 })
+  @Column({ name: 'variant_color', length: 50, nullable: true })
   warnaVariant: string;
 
   // ========================================
@@ -80,6 +80,7 @@ export class OrderItem {
     type: 'decimal',
     precision: 12,
     scale: 2,
+    nullable: true
   })
   hargaSatuan: number;
 
@@ -87,6 +88,7 @@ export class OrderItem {
     type: 'decimal',
     precision: 12,
     scale: 2,
+    nullable: true
   })
   subtotal: number;
 

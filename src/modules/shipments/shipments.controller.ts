@@ -27,17 +27,8 @@ export class ShipmentController {
   @Get('areas')
   @HttpCode(HttpStatus.OK)
   async getAreas(@Query('input') input: string) {
-    if (!input || input.length < 3) {
-      throw new BadRequestException('Input minimal 3 karakter');
-    }
-
-    try {
-      const result = await this.biteshipService.cariLokasi(input, 'ID');
-      return result;
-    } catch (error) {
-      this.logger.error('Error searching areas:', error);
-      throw new BadRequestException('Gagal mencari lokasi');
-    }
+    const result = await this.biteshipService.cariLokasi(input || '', 'ID');
+    return result; // Selalu return { areas: [...] } bahkan kalau kosong
   }
 
   @Post('rates')
@@ -60,7 +51,7 @@ export class ShipmentController {
       const result = await this.biteshipService.cekOngkir({
         origin_area_id: body.origin_area_id,
         destination_area_id: body.destination_area_id,
-        couriers: body.couriers || 'jne,jnt,sicepat,pos',
+        couriers: 'jne,sicepat,pos', // Gunakan semua kurir yang didukung
         items: body.items.map(item => ({
           name: item.name,
           description: item.description || item.name,

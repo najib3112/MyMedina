@@ -60,7 +60,7 @@ describe('ShipmentController', () => {
       const dto: CheckRatesDto = {
         origin_area_id: 'IDNP123',
         destination_area_id: 'IDNP456',
-        couriers: 'jne,jnt',
+        couriers: 'jne',
         items: [
           {
             name: 'Baju',
