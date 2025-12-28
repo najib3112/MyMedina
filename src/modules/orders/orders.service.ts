@@ -384,6 +384,55 @@ export class OrdersService {
   }
 
   /**
+   * Cancel Order (Update Status ke CANCELLED)
+   * Hanya untuk order dengan status PENDING_PAYMENT
+   * Akan restore stock secara otomatis
+   *
+   * ✅ Menggunakan cancelled_at yang sudah ada
+   *
+   * @param orderId - Order ID
+   * @param userId - User ID (untuk validasi ownership)
+   */
+  async batalkanOrder(orderId: string, userId: string): Promise<void> {
+    // Get order dengan relations
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: ['user', 'items', 'items.variant'],
+    });
+
+    if (!order) {
+      throw new NotFoundException('Pesanan tidak ditemukan');
+    }
+
+    // Validate: only owner can cancel
+    if (order.user.id !== userId) {
+      throw new ForbiddenException('Anda tidak memiliki akses ke pesanan ini');
+    }
+
+    // Validate: only PENDING_PAYMENT can be cancelled
+    if (order.status !== OrderStatus.PENDING_PAYMENT) {
+      throw new BadRequestException(
+        'Hanya pesanan yang belum dibayar yang dapat dibatalkan',
+      );
+    }
+
+    // Update status to CANCELLED
+    order.status = OrderStatus.CANCELLED;
+    order.dibatalkanPada = new Date(); // Set cancelled_at timestamp
+
+    // Restore stock untuk setiap item
+    for (const item of order.items) {
+      if (item.variant) {
+        item.variant.stok += item.kuantitas;
+        await this.productVariantRepository.save(item.variant);
+      }
+    }
+
+    // Save order dengan status CANCELLED
+    await this.orderRepository.save(order);
+  }
+
+  /**
    * Generate nomor order baru
    * Menggunakan method entity: generateNomorOrder()
    *

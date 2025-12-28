@@ -382,7 +382,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"origin_area_id\": \"area_12345\",\n  \"destination_area_id\": \"area_67890\",\n  \"couriers\": \"jne,jnt\",\n  \"items\": [\n    {\n      \"name\": \"Gamis Cantik\",\n      \"description\": \"Gamis modern\",\n      \"value\": 160000,\n      \"length\": 30,\n      \"width\": 20,\n      \"height\": 10,\n      \"weight\": 500,\n      \"quantity\": 2\n    }\n  ]\n}"
+              "raw": "{\n  \"origin_area_id\": \"area_12345\",\n  \"destination_area_id\": \"area_67890\",\n  \"couriers\": \"jne,jnt\",\n  \"items\": [\n    {\n      \"name\": \"Gamis Cantik\",\n      \"description\": \"Gamis modern\",\n      \"value\": 150000,\n      \"length\": 30,\n      \"width\": 20,\n      \"height\": 10,\n      \"weight\": 500,\n      \"quantity\": 2\n    }\n  ]\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/shipments/check-rates",

@@ -1,63 +1,71 @@
 // src/shipment/dto/check-rates.dto.ts
 import {
   IsString,
-  IsNotEmpty,
+  IsNumber,
   IsArray,
   ValidateNested,
-  IsNumber,
   IsOptional,
+  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-class RatesItemDto {
+class ItemDto {
   @IsString()
-  @IsNotEmpty({ message: 'Nama item wajib diisi' })
   name: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   description?: string;
 
-  @IsNumber({}, { message: 'Value harus angka' })
-  @IsNotEmpty({ message: 'Value wajib diisi' })
+  @IsNumber()
+  @Min(0)
   value: number;
 
-  @IsNumber({}, { message: 'Length harus angka' })
-  @IsNotEmpty({ message: 'Length wajib diisi' })
+  @IsNumber()
+  @Min(1)
   length: number;
 
-  @IsNumber({}, { message: 'Width harus angka' })
-  @IsNotEmpty({ message: 'Width wajib diisi' })
+  @IsNumber()
+  @Min(1)
   width: number;
 
-  @IsNumber({}, { message: 'Height harus angka' })
-  @IsNotEmpty({ message: 'Height wajib diisi' })
+  @IsNumber()
+  @Min(1)
   height: number;
 
-  @IsNumber({}, { message: 'Weight harus angka' })
-  @IsNotEmpty({ message: 'Weight wajib diisi' })
+  @IsNumber()
+  @Min(1)
   weight: number;
 
-  @IsNumber({}, { message: 'Quantity harus angka' })
-  @IsNotEmpty({ message: 'Quantity wajib diisi' })
+  @IsNumber()
+  @Min(1)
   quantity: number;
 }
 
 export class CheckRatesDto {
-  @IsString()
-  @IsNotEmpty({ message: 'origin_area_id wajib diisi' })
-  origin_area_id: string;
-
-  @IsString()
-  @IsNotEmpty({ message: 'destination_area_id wajib diisi' })
-  destination_area_id: string;
-
-  @IsString()
+  // ✅ Support both area_id dan postal_code
   @IsOptional()
-  couriers?: string; // contoh: "jne,jnt,sicepat"
+  @IsString()
+  origin_area_id?: string;
 
-  @IsArray({ message: 'Items harus array' })
+  @IsOptional()
+  @IsString()
+  destination_area_id?: string;
+
+  @IsOptional()
+  @IsNumber()
+  origin_postal_code?: number;
+
+  @IsOptional()
+  @IsNumber()
+  destination_postal_code?: number;
+
+  @IsOptional()
+  @IsString()
+  couriers?: string;
+
+  @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => RatesItemDto)
-  items: RatesItemDto[];
+  @Type(() => ItemDto)
+  items: ItemDto[];
 }

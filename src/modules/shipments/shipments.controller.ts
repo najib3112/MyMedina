@@ -35,24 +35,28 @@ export class ShipmentController {
   @HttpCode(HttpStatus.OK)
   async getRates(@Body() body: CheckRatesDto) {
     try {
-      this.logger.log('Calculating shipping rates');
+      this.logger.log('📤 Calculating shipping rates');
       this.logger.debug('Payload:', JSON.stringify(body, null, 2));
 
-      // Validasi
-      if (!body.origin_area_id || !body.destination_area_id) {
-        throw new BadRequestException('origin_area_id dan destination_area_id wajib diisi');
+      // ✅ Validasi - Support both area_id dan postal_code
+      const hasAreaId = body.origin_area_id && body.destination_area_id;
+      const hasPostalCode =
+        body.origin_postal_code && body.destination_postal_code;
+
+      if (!hasAreaId && !hasPostalCode) {
+        throw new BadRequestException(
+          'Harus menggunakan area_id ATAU postal_code untuk origin dan destination',
+        );
       }
 
       if (!body.items || body.items.length === 0) {
         throw new BadRequestException('Items tidak boleh kosong');
       }
 
-      // Call Biteship
-      const result = await this.biteshipService.cekOngkir({
-        origin_area_id: body.origin_area_id,
-        destination_area_id: body.destination_area_id,
-        couriers: 'jne,sicepat,pos', // Gunakan semua kurir yang didukung
-        items: body.items.map(item => ({
+      // ✅ Build payload untuk Biteship
+      const biteshipPayload: any = {
+        couriers: body.couriers || 'jne,jnt,sicepat,anteraja,pos',
+        items: body.items.map((item) => ({
           name: item.name,
           description: item.description || item.name,
           value: item.value,
@@ -62,19 +66,34 @@ export class ShipmentController {
           weight: item.weight,
           quantity: item.quantity,
         })),
-      });
+      };
+
+      // ✅ Prioritas: postal_code dulu, fallback ke area_id
+      if (hasPostalCode) {
+        biteshipPayload.origin_postal_code = body.origin_postal_code;
+        biteshipPayload.destination_postal_code = body.destination_postal_code;
+        this.logger.log('Using postal_code method');
+      } else {
+        biteshipPayload.origin_area_id = body.origin_area_id;
+        biteshipPayload.destination_area_id = body.destination_area_id;
+        this.logger.log('Using area_id method');
+      }
+
+      // Call Biteship
+      const result = await this.biteshipService.cekOngkir(biteshipPayload);
 
       this.logger.log('✅ Biteship response SUCCESS');
       return result;
-
     } catch (error) {
-      // ========== PERBAIKAN ERROR LOGGING ==========
       this.logger.error('❌ Biteship API Error:');
       this.logger.error('Status:', error.response?.status);
       this.logger.error('Status Text:', error.response?.statusText);
-      this.logger.error('Error Data:', JSON.stringify(error.response?.data, null, 2));
+      this.logger.error(
+        'Error Data:',
+        JSON.stringify(error.response?.data, null, 2),
+      );
       this.logger.error('Error Message:', error.message);
-      
+
       // Jika error dari Biteship, kirim detail lengkap ke frontend
       if (error.response?.data) {
         throw new BadRequestException({
@@ -82,15 +101,15 @@ export class ShipmentController {
           error: error.response.data.error,
           code: error.response.data.code,
           details: error.response.data,
-          hint: 'Cek API Key Biteship di backend .env file'
+          hint: 'Cek API Key Biteship atau validitas area/postal code',
         });
       }
-      
+
       // Jika error internal (bukan dari Biteship)
       throw new BadRequestException({
         message: 'Terjadi kesalahan saat menghitung ongkir',
         error: error.message,
-        hint: 'Cek koneksi ke Biteship API atau API Key'
+        hint: 'Cek koneksi ke Biteship API atau API Key',
       });
     }
   }
@@ -113,7 +132,10 @@ export class ShipmentController {
 
   @Get('tracking/:waybill/:courier')
   @HttpCode(HttpStatus.OK)
-  async tracking(@Param('waybill') waybill: string, @Param('courier') courier: string) {
+  async tracking(
+    @Param('waybill') waybill: string,
+    @Param('courier') courier: string,
+  ) {
     if (!waybill || !courier) {
       throw new BadRequestException('Waybill dan courier wajib diisi');
     }

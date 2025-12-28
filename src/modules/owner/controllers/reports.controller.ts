@@ -19,8 +19,7 @@ import { ExportService } from '../services/export.service';
 
 /**
  * Owner Reports Controller
- * Provides report generation and export endpoints for financial reports
- * Only accessible by OWNER role
+ * Provides report generation and export endpoints for OWNER role only
  */
 @Controller('owner/reports')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -47,10 +46,7 @@ export class ReportsController {
       new Date(dateRange.endDate),
     );
 
-    return {
-      message: 'Sales report berhasil dibuat',
-      data: report,
-    };
+    return report;
   }
 
   /**
@@ -97,10 +93,7 @@ export class ReportsController {
       new Date(dateRange.endDate),
     );
 
-    return {
-      message: 'Customer report berhasil dibuat',
-      data: report,
-    };
+    return report;
   }
 
   /**
@@ -147,10 +140,7 @@ export class ReportsController {
       new Date(dateRange.endDate),
     );
 
-    return {
-      message: 'Order report berhasil dibuat',
-      data: report,
-    };
+    return report;
   }
 
   /**
@@ -189,11 +179,7 @@ export class ReportsController {
   @HttpCode(HttpStatus.OK)
   async getInventoryReport() {
     const report = await this.reportsService.generateInventoryReport();
-
-    return {
-      message: 'Inventory report berhasil dibuat',
-      data: report,
-    };
+    return report;
   }
 
   /**
@@ -230,10 +216,7 @@ export class ReportsController {
       new Date(dateRange.endDate),
     );
 
-    return {
-      message: 'Category report berhasil dibuat',
-      data: report,
-    };
+    return report;
   }
 
   /**

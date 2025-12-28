@@ -15,7 +15,7 @@ import { ProductVariant } from '../../product-variants/entities/product-variant.
 
 /**
  * Product Entity - FIXED VERSION
- * 
+ *
  * Pastikan column names sesuai dengan database schema
  */
 @Entity('products')
@@ -35,17 +35,49 @@ export class Product {
   @Column({ type: 'text', nullable: true })
   deskripsi: string;
 
-  @Column({ 
-    name: 'base_price', 
-    type: 'decimal', 
-    precision: 12, 
+  @Column({
+    name: 'base_price',
+    type: 'decimal',
+    precision: 12,
     scale: 2,
     transformer: {
       to: (value: number) => value,
-      from: (value: string) => parseFloat(value)
-    }
+      from: (value: string) => parseFloat(value),
+    },
   })
   hargaDasar: number;
+
+  @Column({
+    type: 'numeric',
+    precision: 8,
+    scale: 2,
+    nullable: false,
+  })
+  berat: number;
+
+  @Column({
+    type: 'numeric',
+    precision: 8,
+    scale: 2,
+    nullable: false,
+  })
+  panjang: number;
+
+  @Column({
+    type: 'numeric',
+    precision: 8,
+    scale: 2,
+    nullable: false,
+  })
+  lebar: number;
+
+  @Column({
+    type: 'numeric',
+    precision: 8,
+    scale: 2,
+    nullable: false,
+  })
+  tinggi: number;
 
   @Column({
     type: 'enum',
@@ -71,7 +103,7 @@ export class Product {
 
   // ========================================
   // RELATIONSHIPS
-  // ======================================== 
+  // ========================================
 
   @ManyToOne(() => Category, {
     nullable: false,

@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   Body,
   Param,
   Query,
@@ -31,7 +32,7 @@ import { OrderStatus } from '../../common/enums/order-status.enum';
  * - Controller Pattern: Handles HTTP requests
  * - Dependency Injection: OrdersService injected
  * - Guard Pattern: Authentication and authorization
- * 
+ *
  * ⚠️ IMPORTANT: Route Order Matters!
  * - Static routes (admin/all) MUST come BEFORE dynamic routes (:id)
  * - Otherwise "admin" will be treated as an :id parameter
@@ -76,7 +77,7 @@ export class OrdersController {
   /**
    * ✅ GET /orders/admin/all - Get All Orders (Admin)
    * Admin/Owner only
-   * 
+   *
    * ⚠️ MUST BE BEFORE /:id route!
    * Route statis harus di atas route dinamis
    */
@@ -103,7 +104,7 @@ export class OrdersController {
   /**
    * GET /orders/:id - Get Order by ID
    * Customer (own orders) or Admin (all orders)
-   * 
+   *
    * ⚠️ MUST BE AFTER static routes like admin/all
    * Jika di atas, "admin" akan dianggap sebagai :id
    */
@@ -139,6 +140,28 @@ export class OrdersController {
     return {
       message: 'Status order berhasil diupdate',
       order,
+    };
+  }
+
+  /**
+   * DELETE /orders/:id - Cancel Order
+   * Customer only - Hanya untuk order dengan status PENDING_PAYMENT
+   *
+   * ⚠️ Security:
+   * - Only order owner can cancel their own order
+   * - Only PENDING_PAYMENT status can be cancelled
+   * - Stock will be restored automatically
+   * - Order status will be set to CANCELLED (not deleted)
+   */
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  async batalkanOrder(@Request() req, @Param('id') id: string) {
+    const userId = req.user.userId;
+    await this.ordersService.batalkanOrder(id, userId);
+
+    return {
+      message: 'Pesanan berhasil dibatalkan',
+      orderId: id,
     };
   }
 }

@@ -2,9 +2,12 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 
+// shipment.dto.ts atau interface
 export interface BiteshipRatesRequest {
-  origin_area_id: string;
-  destination_area_id: string;
+  // Support both methods
+  
+  origin_postal_code?: number;
+  destination_postal_code?: number;
   couriers: string;
   items: Array<{
     name: string;

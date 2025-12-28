@@ -26,40 +26,42 @@ export class ReportsService {
    * Generate Sales Report
    */
   async generateSalesReport(startDate: Date, endDate: Date) {
-    // Total sales
+    // Total sales - FIXED: kolom snake_case
     const totalSalesResult = await this.paymentRepository
       .createQueryBuilder('payment')
       .select('COUNT(payment.id)', 'totalTransactions')
-      .addSelect('SUM(payment.amount)', 'totalRevenue')
+      .addSelect('SUM(payment.jumlah)', 'totalRevenue')
       .where('payment.status = :status', { status: PaymentStatus.SETTLEMENT })
-      .andWhere('payment.createdAt BETWEEN :startDate AND :endDate', {
+      .andWhere('"payment"."created_at" BETWEEN :startDate AND :endDate', {
+        // ← FIXED
         startDate,
         endDate,
       })
       .getRawOne();
 
-    // Sales by payment method
+    // Sales by payment method - FIXED: kolom snake_case + metode
     const salesByMethod = await this.paymentRepository
       .createQueryBuilder('payment')
-      .select('payment.method', 'method')
+      .select('payment.metode', 'method') // ← FIXED: method → metode
       .addSelect('COUNT(payment.id)', 'count')
-      .addSelect('SUM(payment.amount)', 'total')
+      .addSelect('SUM(payment.jumlah)', 'total')
       .where('payment.status = :status', { status: PaymentStatus.SETTLEMENT })
-      .andWhere('payment.createdAt BETWEEN :startDate AND :endDate', {
+      .andWhere('"payment"."created_at" BETWEEN :startDate AND :endDate', {
         startDate,
         endDate,
       })
-      .groupBy('payment.method')
+      .groupBy('payment.metode') // ← FIXED: method → metode
       .getRawMany();
 
-    // Daily sales
+    // Daily sales - FIXED: kolom snake_case
     const dailySales = await this.paymentRepository
       .createQueryBuilder('payment')
-      .select("DATE_FORMAT(payment.createdAt, '%Y-%m-%d')", 'date')
+      .select("TO_CHAR(payment.created_at, 'YYYY-MM-DD')", 'date') // ← FIXED: created_at
       .addSelect('COUNT(payment.id)', 'count')
-      .addSelect('SUM(payment.amount)', 'total')
+      .addSelect('SUM(payment.jumlah)', 'total')
       .where('payment.status = :status', { status: PaymentStatus.SETTLEMENT })
-      .andWhere('payment.createdAt BETWEEN :startDate AND :endDate', {
+      .andWhere('"payment"."created_at" BETWEEN :startDate AND :endDate', {
+        // ← FIXED
         startDate,
         endDate,
       })
@@ -67,20 +69,20 @@ export class ReportsService {
       .orderBy('date', 'ASC')
       .getRawMany();
 
-    // Product sales
+    // Product sales - FIXED: kolom snake_case + product_name
     const productSales = await this.orderRepository
-      .createQueryBuilder('order')
-      .leftJoinAndSelect('order.items', 'item')
-      .select('item.namaProduct', 'productName')
+      .createQueryBuilder('ord')
+      .leftJoinAndSelect('ord.items', 'item')
+      .select('"item"."product_name"', 'productName') // ← FIXED: nama_product → product_name
       .addSelect('SUM(item.kuantitas)', 'quantitySold')
       .addSelect('SUM(item.subtotal)', 'totalRevenue')
-      .where('order.status = :status', { status: OrderStatus.COMPLETED })
-      .andWhere('order.createdAt BETWEEN :startDate AND :endDate', {
+      .where('ord.status = :status', { status: OrderStatus.COMPLETED })
+      .andWhere('"ord"."created_at" BETWEEN :startDate AND :endDate', {
         startDate,
         endDate,
       })
-      .groupBy('item.namaProduct')
-      .orderBy('totalRevenue', 'DESC')
+      .groupBy('"item"."product_name"') // ← FIXED
+      .orderBy('SUM(item.subtotal)', 'DESC')
       .getRawMany();
 
     return {
@@ -117,27 +119,29 @@ export class ReportsService {
    * Generate Customer Report
    */
   async generateCustomerReport(startDate: Date, endDate: Date) {
-    // Total customers in period
+    // Total customers in period - FIXED: kolom snake_case
     const newCustomersResult = await this.orderRepository
-      .createQueryBuilder('order')
-      .select('COUNT(DISTINCT order.userId)', 'count')
-      .where('order.createdAt BETWEEN :startDate AND :endDate', {
+      .createQueryBuilder('ord')
+      .select('COUNT(DISTINCT "ord"."user_id")', 'count') // ← FIXED: user_id
+      .where('"ord"."created_at" BETWEEN :startDate AND :endDate', {
+        // ← FIXED
         startDate,
         endDate,
       })
       .getRawOne();
 
-    // Customer segmentation by spending
+    // Customer segmentation by spending - FIXED: kolom snake_case
     const customerSegmentation = await this.orderRepository
-      .createQueryBuilder('order')
-      .select('order.userId', 'userId')
-      .addSelect('COUNT(order.id)', 'orderCount')
-      .addSelect('SUM(order.total)', 'totalSpent')
-      .where('order.createdAt BETWEEN :startDate AND :endDate', {
+      .createQueryBuilder('ord')
+      .select('"ord"."user_id"', 'userId') // ← FIXED
+      .addSelect('COUNT(ord.id)', 'orderCount')
+      .addSelect('SUM(ord.total)', 'totalSpent')
+      .where('"ord"."created_at" BETWEEN :startDate AND :endDate', {
+        // ← FIXED
         startDate,
         endDate,
       })
-      .groupBy('order.userId')
+      .groupBy('"ord"."user_id"') // ← FIXED
       .getRawMany();
 
     // Segment customers
@@ -272,53 +276,55 @@ export class ReportsService {
    * Generate Order Report
    */
   async generateOrderReport(startDate: Date, endDate: Date) {
-    // Orders by status
+    // Orders by status - FIXED: kolom snake_case
     const ordersByStatus = await this.orderRepository
-      .createQueryBuilder('order')
-      .select('order.status', 'status')
-      .addSelect('COUNT(order.id)', 'count')
-      .addSelect('SUM(order.total)', 'totalValue')
-      .where('order.createdAt BETWEEN :startDate AND :endDate', {
+      .createQueryBuilder('ord')
+      .select('ord.status', 'status')
+      .addSelect('COUNT(ord.id)', 'count')
+      .addSelect('SUM(ord.total)', 'totalValue')
+      .where('"ord"."created_at" BETWEEN :startDate AND :endDate', {
+        // ← FIXED
         startDate,
         endDate,
       })
-      .groupBy('order.status')
+      .groupBy('ord.status')
       .getRawMany();
 
-    // Orders by type
+    // Orders by type - FIXED: kolom snake_case + tipe
     const ordersByType = await this.orderRepository
-      .createQueryBuilder('order')
-      .select('order.type', 'type')
-      .addSelect('COUNT(order.id)', 'count')
-      .addSelect('SUM(order.total)', 'totalValue')
-      .where('order.createdAt BETWEEN :startDate AND :endDate', {
+      .createQueryBuilder('ord')
+      .select('ord.tipe', 'type') // ← FIXED: type → tipe
+      .addSelect('COUNT(ord.id)', 'count')
+      .addSelect('SUM(ord.total)', 'totalValue')
+      .where('"ord"."created_at" BETWEEN :startDate AND :endDate', {
         startDate,
         endDate,
       })
-      .groupBy('order.type')
+      .groupBy('ord.tipe') // ← FIXED: type → tipe
       .getRawMany();
 
-    // Orders by city
+    // Orders by city - FIXED: kolom kota
     const ordersByCity = await this.orderRepository
-      .createQueryBuilder('order')
-      .select('order.city', 'city')
-      .addSelect('COUNT(order.id)', 'count')
-      .addSelect('SUM(order.total)', 'totalValue')
-      .where('order.createdAt BETWEEN :startDate AND :endDate', {
+      .createQueryBuilder('ord')
+      .select('ord.kota', 'city') // ← FIXED: city → kota
+      .addSelect('COUNT(ord.id)', 'count')
+      .addSelect('SUM(ord.total)', 'totalValue')
+      .where('"ord"."created_at" BETWEEN :startDate AND :endDate', {
         startDate,
         endDate,
       })
-      .groupBy('order.city')
+      .groupBy('ord.kota') // ← FIXED: city → kota
       .orderBy('count', 'DESC')
       .getRawMany();
 
-    // Total orders summary
+    // Total orders summary - FIXED: kolom snake_case
     const summary = await this.orderRepository
-      .createQueryBuilder('order')
-      .select('COUNT(order.id)', 'totalOrders')
-      .addSelect('SUM(order.total)', 'totalRevenue')
-      .addSelect('AVG(order.total)', 'averageOrderValue')
-      .where('order.createdAt BETWEEN :startDate AND :endDate', {
+      .createQueryBuilder('ord')
+      .select('COUNT(ord.id)', 'totalOrders')
+      .addSelect('SUM(ord.total)', 'totalRevenue')
+      .addSelect('AVG(ord.total)', 'averageOrderValue')
+      .where('"ord"."created_at" BETWEEN :startDate AND :endDate', {
+        // ← FIXED
         startDate,
         endDate,
       })
@@ -358,16 +364,17 @@ export class ReportsService {
    * Generate Product Category Report
    */
   async generateCategoryReport(startDate: Date, endDate: Date) {
+    // FIXED: kolom snake_case + unit_price
     const categoryReport = await this.orderRepository
-      .createQueryBuilder('order')
-      .leftJoinAndSelect('order.items', 'item')
+      .createQueryBuilder('ord')
+      .leftJoinAndSelect('ord.items', 'item')
       .leftJoinAndSelect('item.product', 'product')
-      .leftJoinAndSelect('product.kategori', 'category')
+      .leftJoinAndSelect('product.category', 'category')
       .select('category.nama', 'categoryName')
       .addSelect('COUNT(DISTINCT item.id)', 'itemsSold')
       .addSelect('SUM(item.subtotal)', 'revenue')
-      .addSelect('AVG(item.hargaSnapshot)', 'avgPrice')
-      .where('order.createdAt BETWEEN :startDate AND :endDate', {
+      .addSelect('AVG("item"."unit_price")', 'avgPrice') // ← FIXED: harga_snapshot → unit_price
+      .where('"ord"."created_at" BETWEEN :startDate AND :endDate', {
         startDate,
         endDate,
       })
